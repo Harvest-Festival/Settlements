@@ -1,12 +1,11 @@
-package uk.joshiejack.settlements.entity.ai.action.move;
+package uk.joshiejack.settlements.world.entity.ai.action.move;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionPhysical;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
-@PenguinLoader("wait")
+//@PenguinLoader("wait")
 public class ActionWait extends ActionPhysical {
     private int ticks;
     private int targetTicks;
@@ -18,25 +17,25 @@ public class ActionWait extends ActionPhysical {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (ticks < targetTicks) {
-            npc.getNavigator().clearPath();
+            //TODO: Find clear path npc.getNavigator().clearPath();
             ticks++;
-            return EnumActionResult.PASS;
-        } else return EnumActionResult.SUCCESS;
+            return InteractionResult.PASS;
+        } else return InteractionResult.SUCCESS;
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setInteger("Target", targetTicks);
-        tag.setInteger("Ticks", ticks);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putInt("Target", targetTicks);
+        tag.putInt("Ticks", ticks);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
-        this.targetTicks = tag.getInteger("Target");
-        this.ticks = tag.getInteger("Ticks");
+    public void deserializeNBT(CompoundTag tag) {
+        this.targetTicks = tag.getInt("Target");
+        this.ticks = tag.getInt("Ticks");
     }
 }

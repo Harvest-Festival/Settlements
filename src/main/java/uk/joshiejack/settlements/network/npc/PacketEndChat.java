@@ -1,42 +1,47 @@
 package uk.joshiejack.settlements.network.npc;
 
-import io.netty.buffer.ByteBuf;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.Action;
-import uk.joshiejack.settlements.entity.ai.action.ActionChat;
-import uk.joshiejack.penguinlib.network.PenguinPacket;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+import uk.joshiejack.penguinlib.PenguinLib;
+import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
+import uk.joshiejack.penguinlib.util.registry.Packet;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.Action;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
 
-@PenguinLoader(side = Side.SERVER)
-public class PacketEndChat extends PenguinPacket {
-    private int npcID;
+@Packet(PacketFlow.SERVERBOUND)
+public record PacketEndChat(int npcID) implements PenguinPacket {
+    public static final ResourceLocation ID = PenguinLib.prefix("end_chat");
 
-    public PacketEndChat() {}
+    @Override
+    public @NotNull ResourceLocation id() {
+        return ID;
+    }
+
+    public PacketEndChat(FriendlyByteBuf buf) {
+        this(buf.readInt());
+    }
     public PacketEndChat(int npcID) {
         this.npcID = npcID;
     }
 
     @Override
-    public void toBytes(ByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeInt(npcID);
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {
-        npcID = buf.readInt();
-    }
-
-    @Override
-    public void handlePacket(EntityPlayer player) {
-        Entity entity = player.world.getEntityByID(npcID);
-        if (entity instanceof EntityNPC) {
-            Action action = ((EntityNPC) entity).getMentalAI().getCurrent();
-            if (action instanceof ActionChat) {
-                (((EntityNPC)entity)).removeTalking(player);
-                ((ActionChat)action).onGuiClosed(player, (EntityNPC) entity);
+    public void handle(Player player) {
+        Entity entity = player.level().getEntity(npcID);
+        if (entity instanceof EntityNPC npc) {
+            Action action = npc.getMentalAI().getCurrent();
+            if (action instanceof ActionChat chat) {
+                npc.removeTalking(player);
+                chat.onGuiClosed(player, (EntityNPC) entity);
             }
         }
     }

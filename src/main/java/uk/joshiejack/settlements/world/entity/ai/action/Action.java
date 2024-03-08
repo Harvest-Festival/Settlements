@@ -1,20 +1,20 @@
-package uk.joshiejack.settlements.entity.ai.action;
+package uk.joshiejack.settlements.world.entity.ai.action;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerPlayer;
+import net.minecraft.world.InteractionResult;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.common.util.INBTSerializable;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
 import java.util.Objects;
 
-public abstract class Action implements INBTSerializable<NBTTagCompound> {
+public abstract class Action implements INBTSerializable<CompoundTag> {
     private static final BiMap<String, Class<? extends Action>> ACTIONS = HashBiMap.create();
-    protected EntityPlayer player;
+    protected ServerPlayer player;
     public ResourceLocation registryName;
     public boolean isQuest;
 
@@ -26,7 +26,7 @@ public abstract class Action implements INBTSerializable<NBTTagCompound> {
 
     public static Action createOfType(String type) {
         if (!ACTIONS.containsKey(type)) {
-            Settlements.logger.error("Attempted to create an action of type '" + type + "' that does not exist. Typo?");
+            Settlements.LOGGER.error("Attempted to create an action of type '" + type + "' that does not exist. Typo?");
             return ActionError.INSTANCE;
         }
 
@@ -43,7 +43,7 @@ public abstract class Action implements INBTSerializable<NBTTagCompound> {
         return false;
     }
 
-    public Action withPlayer(EntityPlayer player) { this.player = player; return this; }
+    public Action withPlayer(ServerPlayer player) { this.player = player; return this; }
     public Action withScript(ResourceLocation registryName, boolean isQuest) { this.registryName = registryName; this.isQuest = isQuest; return this; }
     public Action withData(Object... params) { return this; }
 
@@ -62,15 +62,15 @@ public abstract class Action implements INBTSerializable<NBTTagCompound> {
     /** @return EnumActionResult.SUCCESS to go to the next queued item, "succeeded in finishing"
      *          EnumActionResult.FAIL to cancel the rest of the queue,  "there was an error"
      *          EnumActionResult.PASS to continue executing,            "pass to the next step of this action"  */
-    public abstract EnumActionResult execute(EntityNPC npc);
+    public abstract InteractionResult execute(EntityNPC npc);
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        return new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        return new CompoundTag();
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {}
+    public void deserializeNBT(CompoundTag nbt) {}
 
     @Override
     public boolean equals(Object o) {

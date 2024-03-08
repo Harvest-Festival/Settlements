@@ -1,44 +1,40 @@
 package uk.joshiejack.settlements.network.npc;
 
-import io.netty.buffer.ByteBuf;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.penguinlib.network.packet.PacketSyncNBTTagCompound;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+import uk.joshiejack.penguinlib.PenguinLib;
+import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
+import uk.joshiejack.penguinlib.util.registry.Packet;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
-@PenguinLoader(side = Side.CLIENT)
-public class PacketSetAnimation extends PacketSyncNBTTagCompound {
-    private int npcID;
-    private String animation;
+@Packet(PacketFlow.CLIENTBOUND)
+public record PacketSetAnimation(int npcID, String animation, CompoundTag tag) implements PenguinPacket {
+    public static final ResourceLocation ID = PenguinLib.prefix("set_animation");
 
-    public PacketSetAnimation() {}
-    public PacketSetAnimation(int npcID, String animation, NBTTagCompound data) {
-        super(data);
-        this.npcID = npcID;
-        this.animation = animation;
+    @Override
+    public @NotNull ResourceLocation id() {
+        return ID;
+    }
+
+    public PacketSetAnimation(FriendlyByteBuf buf) {
+        this(buf.readInt(), buf.readUtf(), buf.readNbt());
     }
 
     @Override
-    public void toBytes(ByteBuf buf) {
-        super.toBytes(buf);
+    public void write(FriendlyByteBuf buf) {
         buf.writeInt(npcID);
-        ByteBufUtils.writeUTF8String(buf, animation);
+        buf.writeUtf(animation);
+        buf.writeNbt(tag);
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {
-        super.fromBytes(buf);
-        npcID = buf.readInt();
-        animation = ByteBufUtils.readUTF8String(buf);
-    }
-
-    @Override
-    public void handlePacket(EntityPlayer player) {
-        Entity entity = player.world.getEntityByID(npcID);
+    public void handle(Player player) {
+        Entity entity = player.level().getEntity(npcID);
         if (entity instanceof EntityNPC) {
             ((EntityNPC)entity).setAnimation(animation, tag);
         }

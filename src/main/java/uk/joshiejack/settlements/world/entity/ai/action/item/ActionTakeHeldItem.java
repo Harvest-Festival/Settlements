@@ -1,41 +1,40 @@
-package uk.joshiejack.settlements.entity.ai.action.item;
+package uk.joshiejack.settlements.world.entity.ai.action.item;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("take_held")
+//TODO@PenguinLoader("take_held")
 public class ActionTakeHeldItem extends ActionMental {
-    private EnumHand hand;
+    private InteractionHand hand;
     private int amount;
 
     @Override
     public ActionTakeHeldItem withData(Object... params) {
-        this.hand = (EnumHand) params[0];
+        this.hand = (InteractionHand) params[0];
         this.amount = (int) params[1];
         return this;
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
-        if (player != null) player.getHeldItem(hand).shrink(amount);
-        return EnumActionResult.SUCCESS;
+    public InteractionResult execute(EntityNPC npc) {
+        if (player != null) player.getItemInHand(hand).shrink(amount);
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setBoolean("MainHand", hand == EnumHand.MAIN_HAND);
-        tag.setByte("Amount", (byte) amount);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putBoolean("MainHand", hand == InteractionHand.MAIN_HAND);
+        tag.putByte("Amount", (byte) amount);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
-        hand = nbt.getBoolean("MainHand") ? EnumHand.MAIN_HAND : EnumHand.OFF_HAND;
+    public void deserializeNBT(CompoundTag nbt) {
+        hand = nbt.getBoolean("MainHand") ? InteractionHand.MAIN_HAND : InteractionHand.OFF_HAND;
         amount = nbt.getByte("Amount");
     }
 }

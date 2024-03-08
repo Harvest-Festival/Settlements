@@ -1,23 +1,23 @@
-package uk.joshiejack.settlements.entity.ai.action.chat;
+package uk.joshiejack.settlements.world.entity.ai.action.chat;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionChat;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.NeoForge;
 import uk.joshiejack.settlements.event.NPCEvent;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.EnumActionResult;
-import net.minecraftforge.common.MinecraftForge;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("next")
+//TODO@PenguinLoader("next")
 public class ActionNext extends ActionMental implements ActionChat {
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
-        return  player == null ||
-                !MinecraftForge.EVENT_BUS.post(new NPCEvent.NPCRightClickedEvent(npc, player, player.getActiveHand()))
-                ? EnumActionResult.SUCCESS : EnumActionResult.PASS;
+    public InteractionResult execute(EntityNPC npc) {
+        NPCEvent.NPCRightClickedEvent event = new NPCEvent.NPCRightClickedEvent(npc, player, player.getUsedItemHand());
+        return player == null ||
+                !NeoForge.EVENT_BUS.post(event).isCanceled()
+                ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
     @Override
-    public void onGuiClosed(EntityPlayer player, EntityNPC npc, Object... parameters) {}
+    public void onGuiClosed(Player player, EntityNPC npc, Object... parameters) {}
 }

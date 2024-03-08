@@ -14,7 +14,7 @@ public class QuestJS extends AbstractJS<Quest> {
     }
 
     public void complete(PlayerJS player) {
-        QuestSavedData.get((ServerLevel) player.penguinScriptingObject.level()).markCompleted(player.penguinScriptingObject, penguinScriptingObject);
+        QuestSavedData.get((ServerLevel) player.get().level()).markCompleted(player.get(), penguinScriptingObject);
     }
 
     @SuppressWarnings("all")

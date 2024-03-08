@@ -1,28 +1,31 @@
-package uk.joshiejack.settlements.entity.ai;
+package uk.joshiejack.settlements.world.entity.ai;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.minecraft.world.entity.player.Player;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
-public class EntityAITalkingTo extends EntityAIBase {
+import java.util.EnumSet;
+
+public class EntityAITalkingTo extends Goal {
     private final EntityNPC npc;
 
     public EntityAITalkingTo(EntityNPC npc) {
         this.npc = npc;
-        this.setMutexBits(2);
+        this.setFlags(EnumSet.of(Flag.JUMP));
     }
 
     @Override
-    public boolean shouldExecute() {
-        for (EntityPlayer player: npc.getTalkingTo()) {
-            if (npc.getDistanceSq(player) < 3D) return true;
+    public boolean canUse() {
+        for (Player player: npc.getTalkingTo()) {
+            if (npc.distanceTo(player) < 3D) return true;
         }
 
         return false;
     }
 
     @Override
-    public void startExecuting() {
-        npc.getNavigator().clearPath();
+    public void start() {
+        //TODO? Prevent moving?
+        //npc.getNavigator().clearPath();
     }
 }

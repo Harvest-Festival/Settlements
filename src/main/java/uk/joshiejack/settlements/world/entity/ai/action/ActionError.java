@@ -1,24 +1,14 @@
-package uk.joshiejack.settlements.entity.ai.action;
+package uk.joshiejack.settlements.world.entity.ai.action;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
-@PenguinLoader("error")
+//TODO@PenguinLoader("error")
 public class ActionError extends ActionMental {
     public static final Action INSTANCE = new ActionError();
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
-        return EnumActionResult.FAIL;
+    public InteractionResult execute(EntityNPC npc) {
+        return InteractionResult.FAIL;
     }
-
-    @Override
-    public NBTTagCompound serializeNBT() {
-        return new NBTTagCompound();
-    }
-
-    @Override
-    public void deserializeNBT(NBTTagCompound nbt) {}
 }

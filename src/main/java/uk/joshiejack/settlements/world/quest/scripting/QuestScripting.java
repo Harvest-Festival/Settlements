@@ -104,15 +104,15 @@ public class QuestScripting {
 //        }
 
         public QuestTrackerJS quests(LevelJS<?> worldJS) {
-            return new QuestTrackerJS(QuestSavedData.get((ServerLevel) worldJS.penguinScriptingObject).getServerTracker());
+            return new QuestTrackerJS(QuestSavedData.get((ServerLevel) worldJS.get()).getServerTracker());
         }
 
         public QuestTrackerJS quests(PlayerJS player) {
-            return new QuestTrackerJS(QuestSavedData.get((ServerLevel) player.penguinScriptingObject.level()).getPlayerTracker(player.penguinScriptingObject));
+            return new QuestTrackerJS(QuestSavedData.get((ServerLevel) player.get().level()).getPlayerTracker(player.get()));
         }
 
         public QuestTrackerJS quests(LevelJS<?> worldJS, TeamJS team) {
-            return new QuestTrackerJS(QuestSavedData.get((ServerLevel) worldJS.penguinScriptingObject).getTeamTracker(team.penguinScriptingObject.getID()));
+            return new QuestTrackerJS(QuestSavedData.get((ServerLevel) worldJS.get()).getTeamTracker(team.get().getID()));
         }
     }
 }

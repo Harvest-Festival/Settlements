@@ -1,14 +1,13 @@
-package uk.joshiejack.settlements.entity.ai.action.move;
+package uk.joshiejack.settlements.world.entity.ai.action.move;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionPhysical;
-import uk.joshiejack.penguinlib.scripting.WrapperRegistry;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.math.BlockPos;
+import net.minecraft.core.BlockPos;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
-@PenguinLoader("move")
+//TODO @PenguinLoader("move")
 public class ActionMove extends ActionPhysical {
     private BlockPos target;
     private double speed;
@@ -21,26 +20,26 @@ public class ActionMove extends ActionPhysical {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
-        npc.getNavigator().setPath(npc.getNavigator().getPathToXYZ(target.getX() + 0.5, target.getY(), target.getZ() + 0.5), speed);
-        if (npc.getDistance(target.getX() + 0.5, target.getY(), target.getZ() + 0.5) < 1) {
-            return EnumActionResult.SUCCESS;
+    public InteractionResult execute(EntityNPC npc) {
+        npc.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, speed);
+        if (npc.distanceToSqr(target.getX() + 0.5, target.getY(), target.getZ() + 0.5) < 1) {
+            return InteractionResult.SUCCESS;
         }
 
-        return EnumActionResult.PASS;
+        return InteractionResult.PASS;
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setLong("Target", target.toLong());
-        tag.setDouble("Speed", speed);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putLong("Target", target.asLong());
+        tag.putDouble("Speed", speed);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
-        this.target = BlockPos.fromLong(tag.getLong("Target"));
+    public void deserializeNBT(CompoundTag tag) {
+        this.target = BlockPos.of(tag.getLong("Target"));
         this.speed = tag.getDouble("Speed");
     }
 }

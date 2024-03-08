@@ -1,53 +1,49 @@
-package uk.joshiejack.settlements.entity.ai.action.item;
+package uk.joshiejack.settlements.world.entity.ai.action.item;
 
-import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.penguinlib.scripting.wrappers.ItemStackJS;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import uk.joshiejack.penguinlib.util.helpers.minecraft.StackHelper;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraftforge.items.ItemHandlerHelper;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.apache.logging.log4j.Level;
+import uk.joshiejack.penguinlib.scripting.wrapper.ItemStackJS;
+import uk.joshiejack.settlements.Settlements;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("give_item")
+//@PenguinLoader("give_item")
 public class ActionGiftItem extends ActionMental {
     private ItemStack stack;
 
     @Override
     public ActionGiftItem withData(Object... params) {
         if (params[0] instanceof String) {
-            Settlements.logger.log(Level.WARN, "Tried to use a string for a gift item action instead of creating an item!");
+            Settlements.LOGGER.log(Level.WARN, "Tried to use a string for a gift item action instead of creating an item!");
         }
         
         if (params[0] instanceof ItemStack) this.stack = (ItemStack) params[0];
         else {
             assert params[0] instanceof ItemStackJS;
-            this.stack = ((ItemStackJS) params[0]).penguinScriptingObject;
+            this.stack = ((ItemStackJS) params[0]).get();
         }
         return this;
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (player != null) {
             ItemHandlerHelper.giveItemToPlayer(player, stack);
         }
 
-        return EnumActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        StackHelper.writeToNBT(stack, tag);
-        return tag;
+    public CompoundTag serializeNBT() {
+        return stack.save(new CompoundTag());
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
-        stack = StackHelper.readFromNBT(tag);
+    public void deserializeNBT(CompoundTag tag) {
+        stack = ItemStack.of(tag);
     }
 }

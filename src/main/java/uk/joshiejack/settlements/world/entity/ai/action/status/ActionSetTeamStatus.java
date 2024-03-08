@@ -1,15 +1,14 @@
-package uk.joshiejack.settlements.entity.ai.action.status;
+package uk.joshiejack.settlements.world.entity.ai.action.status;
 
-import net.minecraft.world.WorldServer;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.penguinlib.world.teams.PenguinTeams;
-import uk.joshiejack.penguinlib.scripting.wrappers.TeamJS;
-import uk.joshiejack.penguinlib.scripting.wrappers.WorldServerJS;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.penguinlib.scripting.wrapper.ServerLevelJS;
+import uk.joshiejack.penguinlib.scripting.wrapper.TeamJS;
+import uk.joshiejack.penguinlib.world.team.PenguinTeams;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("set_team_status")
+//TODO: @PenguinLoader("set_team_status")
 public class ActionSetTeamStatus extends ActionMental {
     private String status;
     private int value;
@@ -22,11 +21,11 @@ public class ActionSetTeamStatus extends ActionMental {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (player != null) {
-            new TeamJS(PenguinTeams.getTeamForPlayer(player)).status().set(new WorldServerJS((WorldServer) npc.world), status, value);
+            new TeamJS(PenguinTeams.getTeamForPlayer(player)).status().set(new ServerLevelJS((ServerLevel) npc.level()), status, value);
         }
 
-        return EnumActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 }

@@ -1,18 +1,17 @@
-package uk.joshiejack.settlements.entity.ai.action.chat;
+package uk.joshiejack.settlements.world.entity.ai.action.chat;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionChat;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.settlements.network.npc.PacketSay;
-import uk.joshiejack.penguinlib.network.PenguinNetwork;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import org.apache.logging.log4j.util.Strings;
+import uk.joshiejack.penguinlib.network.PenguinNetwork;
+import uk.joshiejack.settlements.network.npc.PacketSay;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("say")
+//TODO: @PenguinLoader("say")
 public class ActionSay extends ActionMental implements ActionChat {
     public String text;
     public String[] formatting;
@@ -37,37 +36,37 @@ public class ActionSay extends ActionMental implements ActionChat {
     }
 
     @Override
-    public void onGuiClosed(EntityPlayer player, EntityNPC npc, Object... parameters) {
+    public void onGuiClosed(Player player, EntityNPC npc, Object... parameters) {
         read = true;
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (!displayed && player != null) {
             displayed = true; //Marked it as displayed
             npc.addTalking(player); //Add the talking
-            PenguinNetwork.sendToClient(new PacketSay(player, npc, this), player);
+            PenguinNetwork.sendToClient(player, new PacketSay(player, npc, this));
         }
 
-        return player == null || npc.IsNotTalkingTo(player) || read ? EnumActionResult.SUCCESS : EnumActionResult.PASS;
+        return player == null || npc.IsNotTalkingTo(player) || read ? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setString("RegistryName", registryName.toString());
-        tag.setBoolean("IsQuest", isQuest);
-        tag.setString("Text", text);
-        tag.setByte("FormattingLength", (byte) formatting.length);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("RegistryName", registryName.toString());
+        tag.putBoolean("IsQuest", isQuest);
+        tag.putString("Text", text);
+        tag.putByte("FormattingLength", (byte) formatting.length);
         for (int i = 0; i < formatting.length; i++) {
-            tag.setString("Formatting" + i, formatting[i]);
+            tag.putString("Formatting" + i, formatting[i]);
         }
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserializeNBT(CompoundTag tag) {
         registryName = new ResourceLocation(tag.getString("RegistryName"));
         isQuest = tag.getBoolean("IsQuest");
         text = tag.getString("Text");

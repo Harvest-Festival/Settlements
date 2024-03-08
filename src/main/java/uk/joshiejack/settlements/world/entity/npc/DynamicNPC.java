@@ -251,7 +251,7 @@ public class DynamicNPC implements NPCInfo {
             this.uniqueID = uniqueID;
         }
 
-        public Builder(Random rand, ResourceLocation uniqueID) {
+        public Builder(RandomSource rand, ResourceLocation uniqueID) {
             this(uniqueID);
             //Randomiser
             {

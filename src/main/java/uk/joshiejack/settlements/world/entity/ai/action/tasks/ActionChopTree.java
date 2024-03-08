@@ -1,36 +1,22 @@
-package uk.joshiejack.settlements.entity.ai.action.tasks;
+package uk.joshiejack.settlements.world.entity.ai.action.tasks;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionPhysical;
-import uk.joshiejack.penguinlib.item.util.TreeTasks;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import uk.joshiejack.penguinlib.util.helpers.minecraft.FakePlayerHelper;
-import net.minecraft.entity.ai.RandomPositionGenerator;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.Vec3d;
-import net.minecraft.world.WorldServer;
-import net.minecraftforge.common.MinecraftForge;
-
-@PenguinLoader("chop_tree")
+//@PenguinLoader("chop_tree")
+//TODO:
+/*
 public class ActionChopTree extends ActionPhysical {
     private int timeTaken;
     private BlockPos tree;
     public ActionChopTree() {}
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
-        if (npc.world.getWorldTime() %20 == 0) {
+    public InteractionResult execute(EntityNPC npc) {
+        if (npc.level().getDayTime() %20 == 0) {
             //If we haven't found a tree, look for one nearby
             if (tree == null) {
                 for (int i = 0; i < 256; i++) {
-                    Vec3d target = RandomPositionGenerator.findRandomTarget(npc, 12, 8);
+                    Vec3 target = RandomPositionGenerator.findRandomTarget(npc, 12, 8);
                     if (target != null && TreeTasks.findTree(npc.world, new BlockPos(target))
-                            && !npc.world.getBlockState(new BlockPos(target).down()).getBlock().isWood(npc.world, new BlockPos(target).down())) {
+                            && !npc.world.getBlockState(new BlockPos(target).down()).getBlock().isWood(npc.level(), new BlockPos(target).down())) {
                         tree = new BlockPos(target);
                         npc.getNavigator().tryMoveToXYZ(target.x, target.y, target.z, 0.5F);
                         break;
@@ -44,12 +30,12 @@ public class ActionChopTree extends ActionPhysical {
                 }
 
                 if (tree.getDistance((int) npc.posX, y + 1, (int)npc.posZ) < 2) {
-                    npc.setHeldItem(EnumHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
-                    npc.swingArm(EnumHand.MAIN_HAND);
-                    MinecraftForge.EVENT_BUS.register(new TreeTasks.ChopTree(tree,
-                            FakePlayerHelper.getFakePlayerWithPosition((WorldServer) npc.world, tree), npc.getHeldItemMainhand()));
+                    npc.setItemInHand(InteractionHand.MAIN_HAND, new ItemStack(Items.IRON_AXE));
+                    npc.swingArm(InteractionHand.MAIN_HAND);
+                    NeoForge.EVENT_BUS.register(new TreeTasks.ChopTree(tree,
+                            FakePlayerHelper.getFakePlayerWithPosition((ServerLevel) npc.world, tree), npc.getMainHandItem()));
                     tree = null;
-                    return EnumActionResult.SUCCESS;
+                    return InteractionResult.SUCCESS;
                 }
 
                 if (timeTaken > 500) { //time_unit > half_hour
@@ -64,10 +50,11 @@ public class ActionChopTree extends ActionPhysical {
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        return new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        return new CompoundTag();
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {}
+    public void deserializeNBT(CompoundTag nbt) {}
 }
+*/

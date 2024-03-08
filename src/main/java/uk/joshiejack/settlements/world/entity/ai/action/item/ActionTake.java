@@ -1,14 +1,18 @@
-package uk.joshiejack.settlements.entity.ai.action.item;
+package uk.joshiejack.settlements.world.entity.ai.action.item;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.penguinlib.data.holder.Holder;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import uk.joshiejack.penguinlib.util.helpers.minecraft.InventoryHelper;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.core.registries.BuiltInRegistries;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.tags.ItemTags;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.item.ItemStack;
+import uk.joshiejack.penguinlib.util.helper.InventoryHelper;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("take_item")
+import java.util.function.Function;
+
+//TODO: @PenguinLoader("take_item")
 public class ActionTake extends ActionMental {
     private String holder;
     private int amount;
@@ -21,21 +25,30 @@ public class ActionTake extends ActionMental {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
-        if (player != null) InventoryHelper.takeItemsInInventory(player, Holder.getFromString(holder), amount);
-        return EnumActionResult.SUCCESS;
+    public InteractionResult execute(EntityNPC npc) {
+        if (player != null) InventoryHelper.takeItemsInInventory(player, asFunction(), amount);
+        return InteractionResult.SUCCESS;
+    }
+
+    public Function<ItemStack, Boolean> asFunction() {
+        ResourceLocation key = holder.startsWith("#") ? new ResourceLocation(holder.substring(1)) : new ResourceLocation(holder);
+        return (s) -> {
+            if (holder.startsWith("#")) {
+                return s.is(ItemTags.create(key));
+            } else return s.getItem() == BuiltInRegistries.ITEM.get(key);
+        };
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setString("Holder", holder);
-        tag.setShort("Amount", (short) amount);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Holder", holder);
+        tag.putShort("Amount", (short) amount);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         holder = nbt.getString("Holder");
         amount = nbt.getShort("Amount");
     }

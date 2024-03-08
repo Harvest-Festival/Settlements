@@ -1,31 +1,37 @@
 package uk.joshiejack.settlements.network.npc;
 
-import uk.joshiejack.settlements.client.gui.GuiNPCAsk;
-import uk.joshiejack.settlements.client.gui.GuiNPCChat;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.chat.ActionSay;
-import uk.joshiejack.penguinlib.client.gui.Chatter;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import uk.joshiejack.penguinlib.PenguinLib;
+import uk.joshiejack.penguinlib.util.registry.Packet;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionSay;
 
-@PenguinLoader(side = Side.CLIENT)
+@Packet(PacketFlow.CLIENTBOUND)
 public class PacketSay extends PacketButtonLoad<ActionSay> {
-    public PacketSay() {}
-    public PacketSay(EntityPlayer player, EntityNPC npc, ActionSay action) {
+    public static final ResourceLocation ID = PenguinLib.prefix("npc_say");
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
+    }
+
+    public PacketSay(FriendlyByteBuf buf) {
+        super(buf);
+    }
+    public PacketSay(Player player, EntityNPC npc, ActionSay action) {
         super(player, npc, action);
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public void handlePacket(EntityPlayer player) {
-        super.handlePacket(player); //Super first!
-        Entity entity = player.world.getEntityByID(npcID);
+    public void handle(Player player) {
+        super.handle(player); //Super first!
+        Entity entity = player.level().getEntity(npcID);
         if (entity instanceof EntityNPC) {
-            Minecraft.getMinecraft().displayGuiScreen(new GuiNPCChat((EntityNPC)entity, new Chatter(GuiNPCAsk.modify(action.registryName, action.isQuest, action.text)), action.formatting));
+           //TODO:  Minecraft.getMinecraft().displayGuiScreen(new GuiNPCChat((EntityNPC)entity, new Chatter(GuiNPCAsk.modify(action.registryName, action.isQuest, action.text)), action.formatting));
         }
     }
 }

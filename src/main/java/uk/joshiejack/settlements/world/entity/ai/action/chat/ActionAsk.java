@@ -1,25 +1,25 @@
-package uk.joshiejack.settlements.entity.ai.action.chat;
+package uk.joshiejack.settlements.world.entity.ai.action.chat;
 
 import com.google.common.collect.Lists;
-import uk.joshiejack.settlements.AdventureDataLoader;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionChat;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.settlements.network.npc.PacketAsk;
-import uk.joshiejack.settlements.quest.Quest;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.penguinlib.scripting.Interpreter;
-import uk.joshiejack.penguinlib.scripting.Scripting;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.ResourceLocation;
+import uk.joshiejack.penguinlib.scripting.ScriptFactory;
+import uk.joshiejack.settlements.Settlements;
+import uk.joshiejack.settlements.network.npc.PacketAsk;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.level.QuestSavedData;
 
 import java.util.List;
 import java.util.Objects;
 
-@PenguinLoader("ask")
+//TODO@PenguinLoader("ask")
 public class ActionAsk extends ActionMental implements ActionChat {
     public String question;
     public String[] answers;
@@ -56,11 +56,11 @@ public class ActionAsk extends ActionMental implements ActionChat {
     }
 
     @Override
-    public void onGuiClosed(EntityPlayer player, EntityNPC npc, Object... parameters) {
+    public void onGuiClosed(Player player, EntityNPC npc, Object... parameters) {
         answered = true; //To allow this to exit the forever loop
         if (parameters.length == 1) {
             int option = (int) parameters[0]; //Always the case
-            Interpreter it = isQuest ? AdventureDataLoader.get(player.world).getTrackerForQuest(player, Quest.REGISTRY.get(registryName)).getData(registryName).getInterpreter() : Scripting.get(registryName);
+            Interpreter<?> it = isQuest ? QuestSavedData.get((ServerLevel) player.level()).getTrackerForQuest(player, Settlements.Registries.QUESTS.get(registryName)).getData(registryName).getInterpreter() : ScriptFactory.getScript(registryName);
             it.callFunction(functions[option], player, npc, option);//Call this function with the option number
         }
 
@@ -68,38 +68,38 @@ public class ActionAsk extends ActionMental implements ActionChat {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (!asked && player != null) {
             asked = true; //Mark asked as true
-            PenguinNetwork.sendToClient(new PacketAsk(player, npc, this), player);
+            PenguinNetwork.sendToClient(player, new PacketAsk(player, npc, this));
             npc.addTalking(player); //We're talk to this player
         }
 
         //If the player no longer exists, then finish this action
-        return player == null || npc.IsNotTalkingTo(player) || answered ? EnumActionResult.SUCCESS : EnumActionResult.PASS; //Always pass
+        return player == null || npc.IsNotTalkingTo(player) || answered ? InteractionResult.SUCCESS : InteractionResult.PASS; //Always pass
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setString("RegistryName", registryName.toString());
-        tag.setBoolean("IsQuest", isQuest);
-        tag.setString("Question", question);
-        tag.setByte("AnswersLength", (byte) answers.length);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("RegistryName", registryName.toString());
+        tag.putBoolean("IsQuest", isQuest);
+        tag.putString("Question", question);
+        tag.putByte("AnswersLength", (byte) answers.length);
         for (int i = 0; i < answers.length; i++) {
-            tag.setString("Answer" + i, answers[i]);
+            tag.putString("Answer" + i, answers[i]);
         }
 
-        tag.setByte("FormattingLength", (byte) formatting.length);
+        tag.putByte("FormattingLength", (byte) formatting.length);
         for (int i = 0; i < formatting.length; i++) {
-            tag.setString("Formatting" + i, formatting[i]);
+            tag.putString("Formatting" + i, formatting[i]);
         }
 
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         registryName = new ResourceLocation(nbt.getString("RegistryName"));
         isQuest = nbt.getBoolean("IsQuest");
         question = nbt.getString("Question");

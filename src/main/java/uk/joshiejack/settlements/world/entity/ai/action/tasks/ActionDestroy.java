@@ -1,35 +1,7 @@
-package uk.joshiejack.settlements.entity.ai.action.tasks;
+package uk.joshiejack.settlements.world.entity.ai.action.tasks;
 
-import uk.joshiejack.settlements.AdventureDataLoader;
-import uk.joshiejack.settlements.building.Building;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionPhysical;
-import uk.joshiejack.settlements.network.town.land.PacketRemoveBuilding;
-import uk.joshiejack.settlements.world.town.Town;
-import uk.joshiejack.settlements.world.town.land.TownBuilding;
-import uk.joshiejack.penguinlib.network.PenguinNetwork;
-import uk.joshiejack.penguinlib.template.Placeable;
-import uk.joshiejack.penguinlib.template.blocks.PlaceableBlock;
-import uk.joshiejack.penguinlib.template.entities.PlaceableEntity;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import uk.joshiejack.penguinlib.util.helpers.minecraft.BlockPosHelper;
-import uk.joshiejack.penguinlib.util.helpers.minecraft.EntityHelper;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.entity.Entity;
-import net.minecraft.init.Blocks;
-import net.minecraft.item.Item;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.Rotation;
-import net.minecraft.util.math.BlockPos;
-
-import java.util.List;
-
-@PenguinLoader("destroy")
-public class ActionDestroy extends ActionPhysical {
+//TODO ?@PenguinLoader("destroy")
+/*public class ActionDestroy extends ActionPhysical {
     private TownBuilding location;
     private Placeable.ConstructionStage stage;
     private int index;
@@ -56,7 +28,7 @@ public class ActionDestroy extends ActionPhysical {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (location == null) return EnumActionResult.FAIL;
         //Set the animation for the builder
         if (!setAnimation) {
@@ -143,4 +115,4 @@ public class ActionDestroy extends ActionPhysical {
         stage = Placeable.ConstructionStage.values()[nbt.getByte("Stage")];
         index = nbt.getInteger("Index");
     }
-}
+}*/

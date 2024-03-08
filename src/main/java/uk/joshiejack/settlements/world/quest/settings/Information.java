@@ -19,7 +19,7 @@ public class Information {
         this.description = description;
     }
 
-    public Information setIcon(ItemStackJS icon) { this.icon = icon.penguinScriptingObject; return this; }
+    public Information setIcon(ItemStackJS icon) { this.icon = icon.get(); return this; }
     public Information setTitle(String name) { this.name = name; return this; }
     public Information setDescription(String description) { this.description = description; return this; }
 

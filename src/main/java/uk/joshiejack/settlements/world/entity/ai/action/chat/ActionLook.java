@@ -1,22 +1,21 @@
-package uk.joshiejack.settlements.entity.ai.action.chat;
+package uk.joshiejack.settlements.world.entity.ai.action.chat;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.util.EnumActionResult;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("look")
+//TODO@PenguinLoader("look")
 public class ActionLook extends ActionMental {
     private int lookTimer;
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (player != null) {
-            npc.getLookHelper().setLookPosition(player.posX, player.posY + (double) player.getEyeHeight(), player.posZ, (float) npc.getHorizontalFaceSpeed(), (float) npc.getVerticalFaceSpeed());
+            npc.getLookControl().setLookAt(player.getX(), player.getY() + (double) player.getEyeHeight(), player.getZ(), (float) npc.getHeadRotSpeed(), (float) npc.getMaxHeadXRot());
         }
 
         lookTimer++;
 
-        return lookTimer > 40? EnumActionResult.SUCCESS : EnumActionResult.PASS;
+        return lookTimer > 40? InteractionResult.SUCCESS : InteractionResult.PASS;
     }
 }

@@ -1,17 +1,16 @@
-package uk.joshiejack.settlements.entity.ai.action.move;
+package uk.joshiejack.settlements.world.entity.ai.action.move;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionPhysical;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.EntityLivingBase;
-import net.minecraft.entity.ai.EntityAIAttackMelee;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.EnumHand;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.world.InteractionHand;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.LivingEntity;
+import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
-@PenguinLoader("attack")
+//TODO@PenguinLoader("attack")
 public class ActionAttack extends ActionPhysical {
-    private EntityAIAttackMelee ai;
+    private MeleeAttackGoal ai;
     private int delayCounter;
     private int attackTick;
     private double targetX;
@@ -25,22 +24,22 @@ public class ActionAttack extends ActionPhysical {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC attacker) {
+    public InteractionResult execute(EntityNPC attacker) {
         if (ai == null) {
-            ai = new EntityAIAttackMelee(attacker, 1.0D, false);
+            ai = new MeleeAttackGoal(attacker, 1.0D, false);
         }
 
         if (player != null) {
-            attacker.setAttackTarget(player);
-            attacker.getLookHelper().setLookPositionWithEntity(player, 30.0F, 30.0F);
-            double d0 = attacker.getDistanceSq(player.posX, player.getEntityBoundingBox().minY, player.posZ);
+            attacker.setTarget(player);
+            attacker.getLookControl().setLookAt(player, 30.0F, 30.0F);
+            double d0 = attacker.distanceToSqr(player.getX(), player.getBoundingBox().minY, player.getZ());
             --delayCounter;
 
-            if (attacker.getEntitySenses().canSee(player) && delayCounter <= 0 && (targetX == 0.0D && targetY == 0.0D && targetZ == 0.0D || player.getDistanceSq(targetX, targetY, targetZ) >= 1.0D || attacker.getRNG().nextFloat() < 0.05F)) {
-                targetX = player.posX;
-                targetY = player.getEntityBoundingBox().minY;
-                targetZ = player.posZ;
-                delayCounter = 4 + attacker.getRNG().nextInt(7);
+            if (attacker.getSensing().hasLineOfSight(player) && delayCounter <= 0 && (targetX == 0.0D && targetY == 0.0D && targetZ == 0.0D || player.distanceToSqr(targetX, targetY, targetZ) >= 1.0D || attacker.getRandom().nextFloat() < 0.05F)) {
+                targetX = player.getX();
+                targetY = player.getBoundingBox().minY;
+                targetZ = player.getZ();
+                delayCounter = 4 + attacker.getRandom().nextInt(7);
 
                 if (d0 > 1024.0D) {
                     delayCounter += 10;
@@ -48,42 +47,42 @@ public class ActionAttack extends ActionPhysical {
                     delayCounter += 5;
                 }
 
-                if (!attacker.getNavigator().tryMoveToEntityLiving(player, speed)) {
+                if (!attacker.getNavigation().moveTo(player, speed)) {
                     delayCounter += 15;
                 }
             }
 
             attackTick = Math.max(attackTick - 1, 0);
             checkAndPerformAttack(attacker, player, d0);
-            return EnumActionResult.PASS;
+            return InteractionResult.PASS;
         }
 
-        return EnumActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    private void checkAndPerformAttack(EntityNPC attacker, EntityLivingBase enemy, double distToEnemySqr) {
+    private void checkAndPerformAttack(EntityNPC attacker, LivingEntity enemy, double distToEnemySqr) {
         double d0 = getAttackReachSqr(attacker, enemy);
 
         if (distToEnemySqr <= d0 && this.attackTick <= 0) {
             this.attackTick = 20;
-            attacker.swingArm(EnumHand.MAIN_HAND);
-            attacker.attackEntityAsMob(enemy);
+            attacker.swing(InteractionHand.MAIN_HAND);
+            attacker.doHurtTarget(enemy);
         }
     }
 
-    protected double getAttackReachSqr(EntityNPC attacker, EntityLivingBase attackTarget) {
-        return attacker.width * 2.0F * attacker.width * 2.0F + attackTarget.width;
+    protected double getAttackReachSqr(EntityNPC attacker, LivingEntity attackTarget) {
+        return attacker.getBbWidth() * 2.0F * attacker.getBbWidth() * 2.0F + attackTarget.getBbWidth();
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setDouble("Speed", speed);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putDouble("Speed", speed);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {
+    public void deserializeNBT(CompoundTag nbt) {
         speed = nbt.getDouble("Speed");
     }
 }

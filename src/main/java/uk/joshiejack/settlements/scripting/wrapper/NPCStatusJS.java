@@ -1,51 +1,50 @@
-package uk.joshiejack.settlements.scripting.wrappers;
+package uk.joshiejack.settlements.scripting.wrapper;
 
-import net.minecraft.util.ResourceLocation;
-import uk.joshiejack.settlements.AdventureData;
-import uk.joshiejack.settlements.AdventureDataLoader;
-import uk.joshiejack.settlements.npcs.status.StatusTracker;
-import uk.joshiejack.penguinlib.scripting.wrappers.AbstractJS;
-import uk.joshiejack.penguinlib.scripting.wrappers.PlayerJS;
-import uk.joshiejack.penguinlib.scripting.wrappers.WorldJS;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
+import uk.joshiejack.penguinlib.scripting.wrapper.AbstractJS;
+import uk.joshiejack.penguinlib.scripting.wrapper.LevelJS;
+import uk.joshiejack.penguinlib.scripting.wrapper.PlayerJS;
+import uk.joshiejack.settlements.world.entity.npc.status.StatusTracker;
+import uk.joshiejack.settlements.world.level.StatusSavedData;
 
 public class NPCStatusJS extends AbstractJS<ResourceLocation> {
     public NPCStatusJS(ResourceLocation npc) {
         super(npc);
     }
 
-    public boolean is(WorldJS<?> worldJS, String status, int value) {
-        ResourceLocation object = penguinScriptingObject;
-        AdventureData data = AdventureDataLoader.get(worldJS.penguinScriptingObject);
+    public boolean is(LevelJS<?> worldJS, String status, int value) {
+        StatusSavedData data = StatusSavedData.get((ServerLevel) worldJS.get());
         for (StatusTracker tracker: data.getStatusTrackers()) {
-            if (tracker.get(object, status) == value) return true;
+            if (tracker.get(penguinScriptingObject, status) == value) return true;
         }
 
         return false;
     }
 
     public int get(PlayerJS wrapper, String status) {
-        return AdventureDataLoader.get(wrapper.penguinScriptingObject.world).getStatusTracker(wrapper.penguinScriptingObject).get(penguinScriptingObject, status);
+        return StatusSavedData.get((ServerLevel) wrapper.get().level()).getStatusTracker(wrapper.get()).get(penguinScriptingObject, status);
     }
 
     public void set(PlayerJS wrapper, String status, int value) {
-        AdventureData data = AdventureDataLoader.get(wrapper.penguinScriptingObject.world);
-        data.getStatusTracker(wrapper.penguinScriptingObject).set(wrapper.world().penguinScriptingObject, penguinScriptingObject, status, value);
-        data.markDirty();
+        StatusSavedData data = StatusSavedData.get((ServerLevel) wrapper.get().level());
+        data.getStatusTracker(wrapper.get()).set(wrapper.level().get(), penguinScriptingObject, status, value);
+        data.setDirty();
     }
 
     public void adjust(PlayerJS wrapper, String status, int value) {
-        AdventureData data = AdventureDataLoader.get(wrapper.penguinScriptingObject.world);
-        data.getStatusTracker(wrapper.penguinScriptingObject)
-                .adjust(wrapper.world().penguinScriptingObject, penguinScriptingObject, status, value);
-        data.markDirty();
+        StatusSavedData data = StatusSavedData.get((ServerLevel) wrapper.get().level());
+        data.getStatusTracker(wrapper.get())
+                .adjust(wrapper.level().get(), penguinScriptingObject, status, value);
+        data.setDirty();
     }
 
     public void adjustWithRange(PlayerJS wrapper, String status, int value, int min, int max) {
         ResourceLocation object = penguinScriptingObject;
-        AdventureData data = AdventureDataLoader.get(wrapper.penguinScriptingObject.world);
-        StatusTracker tracker = data.getStatusTracker(wrapper.penguinScriptingObject);
-        tracker.adjust(wrapper.world().penguinScriptingObject, object, status, value);
-        tracker.set(wrapper.world().penguinScriptingObject, object, status, Math.min(max, Math.max(min, tracker.get(object, status))));
-        data.markDirty();
+        StatusSavedData data = StatusSavedData.get((ServerLevel) wrapper.get().level());
+        StatusTracker tracker = data.getStatusTracker(wrapper.get());
+        tracker.adjust(wrapper.level().get(), object, status, value);
+        tracker.set(wrapper.level().get(), object, status, Math.min(max, Math.max(min, tracker.get(object, status))));
+        data.setDirty();
     }
 }

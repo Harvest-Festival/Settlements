@@ -1,21 +1,19 @@
-package uk.joshiejack.settlements.entity.ai.action.registry;
+package uk.joshiejack.settlements.world.entity.ai.action.registry;
 
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.penguinlib.util.PenguinRegistry;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.level.Level;
+import uk.joshiejack.penguinlib.util.registry.ReloadableRegistry;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-import java.util.Map;
-
-public abstract class AbstractActionRegistry<P extends PenguinRegistry> extends ActionMental {
+public abstract class AbstractActionRegistry<O extends ReloadableRegistry.PenguinRegistry<O>> extends ActionMental {
     protected ResourceLocation resource;
-    private final Map<ResourceLocation, P> map;
+    protected final ReloadableRegistry<O> registry;
 
-    public AbstractActionRegistry(Map<ResourceLocation, P> map) {
-        this.map = map;
+    public AbstractActionRegistry(ReloadableRegistry<O> registry) {
+        this.registry = registry;
     }
 
     @Override
@@ -25,28 +23,28 @@ public abstract class AbstractActionRegistry<P extends PenguinRegistry> extends 
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (player != null) {
-            P p = map.get(resource);
+            O p = registry.get(resource);
             if (p != null) {
-                performAction(npc.world, p);
+                performAction(npc.level(), p);
             }
         }
 
-        return EnumActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
-    public abstract void performAction(World world, P object);
+    public abstract void performAction(Level world, O object);
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setString("Resource", resource.toString());
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("Resource", resource.toString());
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserializeNBT(CompoundTag tag) {
         resource = new ResourceLocation(tag.getString("Resource"));
     }
 }

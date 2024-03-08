@@ -1,12 +1,12 @@
-package uk.joshiejack.settlements.client.animation;
+package uk.joshiejack.settlements.world.entity.animation;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraftforge.common.util.INBTSerializable;
+import net.minecraft.nbt.CompoundTag;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
-public abstract class Animation implements INBTSerializable<NBTTagCompound> {
+public abstract class Animation implements INBTSerializable<CompoundTag> {
     private static final BiMap<String, Class<? extends Animation>> ANIMATIONS = HashBiMap.create();
     public static void register(String type, Class<? extends Animation> clazz) {
         ANIMATIONS.put(type, clazz);
@@ -27,12 +27,12 @@ public abstract class Animation implements INBTSerializable<NBTTagCompound> {
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        return new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        return new CompoundTag();
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound nbt) {}
+    public void deserializeNBT(CompoundTag nbt) {}
 
     public boolean renderLiving(EntityNPC npc, double x, double y, double z) {
         return false;

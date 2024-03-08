@@ -1,8 +1,8 @@
-package uk.joshiejack.settlements.entity.ai.action;
+package uk.joshiejack.settlements.world.entity.ai.action;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import net.minecraft.entity.player.EntityPlayer;
+import net.minecraft.world.entity.player.Player;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
 public interface ActionChat {
-    void onGuiClosed(EntityPlayer player, EntityNPC npc, Object... parameters);
+    void onGuiClosed(Player player, EntityNPC npc, Object... parameters);
 }

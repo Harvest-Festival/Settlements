@@ -1,47 +1,38 @@
 package uk.joshiejack.settlements.world.entity;
 
 import com.google.common.collect.Sets;
-import io.netty.buffer.ByteBuf;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.Mth;
+import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.damagesource.DamageSource;
-import net.minecraft.world.entity.*;
+import net.minecraft.world.entity.AgeableMob;
+import net.minecraft.world.entity.EntityType;
+import net.minecraft.world.entity.Mob;
+import net.minecraft.world.entity.MoverType;
 import net.minecraft.world.entity.ai.attributes.AttributeSupplier;
 import net.minecraft.world.entity.ai.attributes.Attributes;
 import net.minecraft.world.entity.ai.goal.FloatGoal;
 import net.minecraft.world.entity.ai.goal.Goal;
-import net.minecraft.world.entity.animal.Cow;
-import net.minecraft.world.entity.npc.Villager;
+import net.minecraft.world.entity.ai.navigation.GroundPathNavigation;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.item.ItemStack;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.item.SpawnEggItem;
-import net.minecraft.world.item.enchantment.EnchantmentHelper;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.pathfinder.BlockPathTypes;
+import net.minecraft.world.phys.Vec3;
 import net.neoforged.neoforge.common.NeoForge;
 import net.neoforged.neoforge.entity.IEntityWithComplexSpawn;
+import net.neoforged.neoforge.fluids.FluidType;
 import org.jetbrains.annotations.NotNull;
-import uk.joshiejack.settlements.AdventureDataLoader;
+import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.client.animation.Animation;
-import uk.joshiejack.settlements.entity.ai.EntityAIActionQueue;
-import uk.joshiejack.settlements.entity.ai.EntityAISchedule;
-import uk.joshiejack.settlements.entity.ai.EntityAITalkingTo;
-import uk.joshiejack.settlements.entity.ai.action.chat.ActionGreet;
 import uk.joshiejack.settlements.event.NPCEvent;
 import uk.joshiejack.settlements.network.npc.PacketSetAnimation;
-import uk.joshiejack.settlements.npcs.Age;
-import uk.joshiejack.settlements.npcs.DynamicNPC;
-import uk.joshiejack.settlements.npcs.NPC;
-import uk.joshiejack.settlements.npcs.NPCInfo;
-import uk.joshiejack.settlements.util.TownFinder;
 import uk.joshiejack.settlements.world.entity.ai.EntityAIActionQueue;
 import uk.joshiejack.settlements.world.entity.ai.EntityAISchedule;
 import uk.joshiejack.settlements.world.entity.ai.EntityAITalkingTo;
@@ -51,35 +42,13 @@ import uk.joshiejack.settlements.world.entity.npc.Age;
 import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
 import uk.joshiejack.settlements.world.entity.npc.NPCInfo;
-import uk.joshiejack.settlements.world.town.TownServer;
-import uk.joshiejack.penguinlib.network.PenguinNetwork;
-import net.minecraft.block.state.IBlockState;
-import net.minecraft.enchantment.EnchantmentHelper;
-import net.minecraft.entity.*;
-import net.minecraft.entity.ai.EntityAIOpenDoor;
-import net.minecraft.entity.ai.EntityAISwimming;
-import net.minecraft.entity.ai.EntityAIWatchClosest;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.init.Items;
-import net.minecraft.item.ItemStack;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.pathfinding.PathNavigateGround;
-import net.minecraft.pathfinding.PathNodeType;
-import net.minecraft.util.DamageSource;
-import net.minecraft.util.EnumHand;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.util.math.MathHelper;
-import net.minecraft.world.World;
-import net.minecraftforge.common.MinecraftForge;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
 import java.util.Set;
 import java.util.UUID;
 
-public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
+public class EntityNPC extends AgeableMob implements IEntityWithComplexSpawn {
     public float renderOffsetX, renderOffsetY, renderOffsetZ;
     protected CompoundTag custom;
     protected NPC npc;
@@ -92,7 +61,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     private int lifespan;
     private boolean lootDisabled;
 
-    public NPCMob(EntityType<? extends AgeableMob> type, Level world) {
+    public EntityNPC(EntityType<? extends AgeableMob> type, Level world) {
         this(type, world, NPC.NULL, null);
     }
 
@@ -103,12 +72,12 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
         ResourceLocation uniqueID = new ResourceLocation("custom", UUID.randomUUID().toString());
         CompoundTag tag = new DynamicNPC.Builder(level.random, uniqueID).build();
         //TODO: Maybe move to town.getCensus().createCustomNPC???
-        NPCMob npc =  new NPCMob((EntityType<? extends AgeableMob>) parent.getType(), level, NPC.NULL, tag);
+        EntityNPC npc =  new EntityNPC((EntityType<? extends AgeableMob>) parent.getType(), level, NPC.NULL, tag);
         npc.setAge(-24000);
         return npc;
     }
 
-    public NPCMob(EntityType<? extends AgeableMob> type, Level world, @Nonnull NPC npc, @Nullable CompoundTag customData) {
+    public EntityNPC(EntityType<? extends AgeableMob> type, Level world, @Nonnull NPC npc, @Nullable CompoundTag customData) {
         super(type, world);
         this.npc = npc;
         this.custom = customData == null ? new CompoundTag() : customData;
@@ -119,7 +88,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     }
 
     @SuppressWarnings("unchecked")
-    public NPCMob(NPCMob entity) {
+    public EntityNPC(EntityNPC entity) {
         this((EntityType<? extends AgeableMob>) entity.getType(), entity.level(), entity.npc, entity.custom);
     }
 
@@ -132,10 +101,10 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
         else {
             this.lifespan = info.getNPCClass().lifespan();
             float modifier = info.getNPCClass().height();
-            setSize(0.6F * modifier, 1.6F * modifier);
-            setEntityInvulnerable(info.getNPCClass().invulnerable());
-            this.noClip = info.getNPCClass().isImmovable();
-            this.setNoGravity(info.getNPCClass().immovable());
+            //TODO? setSize(0.6F * modifier, 1.6F * modifier);
+            setInvulnerable(info.getNPCClass().invulnerable());
+            //TODO>? this.noClip = info.getNPCClass().isImmovable();
+            setNoGravity(info.getNPCClass().immovable());
         }
     }
 
@@ -157,19 +126,19 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
 
     @Override
     protected void registerGoals() {
-        ((PathNavigateGround) getNavigator()).setEnterDoors(true);
-        ((PathNavigateGround) getNavigator()).setBreakDoors(true);
+        ((GroundPathNavigation)this.getNavigation()).setCanPassDoors(true);
+        ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(0, new EntityAITalkingTo(this));
-        goalSelector.addGoal(1, new EntityAIWatchClosest(this, Player.class, 8.0F));
-        goalSelector.addGoal(4, new EntityAIOpenDoor(this, true));
+        //TODO? goalSelector.addGoal(1, new EntityAIWatchClosest(this, Player.class, 8.0F));
+        //TODO? goalSelector.addGoal(4, new EntityAIOpenDoor(this, true));
         physicalAI = new EntityAIActionQueue(this, Goal.Flag.MOVE);
         mentalAI = new EntityAIActionQueue(this, Goal.Flag.LOOK);
         goalSelector.addGoal(6, mentalAI);
         goalSelector.addGoal(6, physicalAI);
         goalSelector.addGoal(7, new EntityAISchedule(this));
-        goalSelector.addGoal(9, new EntityAIWatchClosest(this, EntityPlayer.class, 3.0F, 1.0F));
-        goalSelector.addGoal(9, new EntityAIWatchClosest(this, NPCMob.class, 5.0F, 0.02F));
+        //TODO? goalSelector.addGoal(9, new EntityAIWatchClosest(this, Player.class, 3.0F, 1.0F));
+        //TODO? goalSelector.addGoal(9, new EntityAIWatchClosest(this, EntityNPC.class, 5.0F, 0.02F));
     }
 
     public static AttributeSupplier.Builder createAttributes() {
@@ -274,8 +243,8 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     }
 
     @Override
-    public boolean canDespawn() {
-        return false;
+    public boolean isPersistenceRequired() {
+        return true;
     }
 
     @Override
@@ -283,15 +252,15 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
         ItemStack held = player.getItemInHand(hand);
         boolean flag = held.getItem() instanceof SpawnEggItem;
         if (!flag && isAlive()) {
-            if (!level().isClientSide) {
+            if (player instanceof ServerPlayer serverPlayer) {
                 NeoForge.EVENT_BUS.post(new NPCEvent.NPCRightClickedEvent(this, player, hand));
                 if (mentalAI.getCurrent() == null && mentalAI.all().isEmpty() && talkingTo.isEmpty()) {
                     //If a quest has been started by the event, we'd know this if the npc is talking
                     //If they aren't talking, open the random chat
-                    mentalAI.addToEnd(new ActionGreet().withPlayer(player));
+                    mentalAI.addToEnd(new ActionGreet().withPlayer(serverPlayer));
                 }
 
-                lifespan = npc.getNPCClass().getLifespan(); //Reset the lifespan
+                lifespan = npc.getNPCClass().lifespan(); //Reset the lifespan
             }
 
             return InteractionResult.SUCCESS;
@@ -301,33 +270,46 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     }
 
     @Override
-    public void onLivingUpdate() {
-        updateArmSwingProgress();
-        super.onLivingUpdate();
-        if (world.isRemote && animation != null) {
+    public void aiStep() {
+        super.aiStep();
+        updateSwingTime();
+    }
+
+    @Override
+    public void tick() {
+        super.tick();
+        if (level().isClientSide && animation != null) {
             animation.play(this);
         }
 
-        if (!world.isRemote) {
+        if (!level().isClientSide) {
             npc.callScript("onNPCUpdate", this);
         }
 
-        if (!world.isRemote && talkingTo.size() == 0 && physicalAI.all().isEmpty() && mentalAI.all().isEmpty()) {
-            if (npc.getNPCClass().getLifespan() > 0) {
+        if (!level().isClientSide && talkingTo.isEmpty() && physicalAI.all().isEmpty() && mentalAI.all().isEmpty()) {
+            if (npc.getNPCClass().lifespan() > 0) {
                 lifespan--;
                 if (lifespan <= 0) {
-                    dropLoot(false, 0, DamageSource.MAGIC);
-                    this.setDead(); //Kill the bitch
+                    dropFromLootTable(damageSources().magic(),false);
+                    this.setRemoved(RemovalReason.DISCARDED); //Kill the bitch
                 }
             }
         }
     }
 
     @Override
-    public boolean canBreatheUnderwater() {
-        return npc.getNPCClass().canBreatheUnderwater();
+    public boolean canDrownInFluidType(@NotNull FluidType type) {
+        return !npc.getNPCClass().underwater() && super.canDrownInFluidType(type);
     }
 
+    @Override
+    public void move(@NotNull MoverType type, @NotNull Vec3 vec3) {
+        if (!npc.getNPCClass().floats()) {
+            super.move(type, vec3);
+        }
+    }
+
+    /*
     @Override
     public void travel(float strafe, float vertical, float forward) {
         if (npc.getNPCClass().floats()) {
@@ -372,8 +354,10 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
             limbSwingAmount = 0F;
             limbSwing = 0F;
         } else super.travel(strafe, vertical, forward);
-    }
+    } */
 
+    //TODO:
+    /*
     @Override
     public void onDeath(@Nonnull DamageSource cause) {
         super.onDeath(cause);
@@ -384,31 +368,31 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
             town.getCensus().onNPCsChanged(this.world); //Update invitable list
             AdventureDataLoader.get(this.world).markDirty(); //Save Stuff
         }
-    }
+    }*/
 
     @Override
-    public void readEntityFromNBT(@Nonnull CompoundTag nbt) {
-        super.readEntityFromNBT(nbt);
+    public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
+        super.readAdditionalSaveData(nbt);
         npc = NPC.getNPCFromRegistry(new ResourceLocation(nbt.getString("NPC")));
-        if (npc == NPC.NULL_NPC) this.setDead(); //Kill off null npcs
-        physicalAI.deserializeNBT(nbt.getTagList("PhysicalActions", 10));
-        mentalAI.deserializeNBT(nbt.getTagList("MentalActions", 10));
+        if (npc == NPC.NULL) this.setRemoved(RemovalReason.DISCARDED); //Kill off null npcs
+        physicalAI.deserializeNBT(nbt.getList("PhysicalActions", 10));
+        mentalAI.deserializeNBT(nbt.getList("MentalActions", 10));
         lootDisabled = nbt.getBoolean("LootDisabled");
-        town = nbt.getInteger("Town");
-        custom = nbt.getCompoundTag("Custom");
-        info = custom.hasNoTags() ? npc : DynamicNPC.fromTag(custom);
+        town = nbt.getInt("Town");
+        custom = nbt.getCompound("Custom");
+        info = custom.isEmpty() ? npc : DynamicNPC.fromTag(custom);
         initNPCData(); //Reload in the data where applicable
     }
 
     @Override
-    public void writeEntityToNBT(@Nonnull NBTTagCompound nbt) {
-        super.writeEntityToNBT(nbt);
-        nbt.setString("NPC", npc.getRegistryName().toString());
-        nbt.setTag("PhysicalActions", physicalAI.serializeNBT());
-        nbt.setTag("MentalActions", mentalAI.serializeNBT());
-        nbt.setBoolean("LootDisabled", lootDisabled);
-        nbt.setInteger("Town", town);
-        nbt.setTag("Custom", custom);
+    public void addAdditionalSaveData(@Nonnull CompoundTag nbt) {
+        super.addAdditionalSaveData(nbt);
+        nbt.putString("NPC", npc.id().toString());
+        nbt.put("PhysicalActions", physicalAI.serializeNBT());
+        nbt.put("MentalActions", mentalAI.serializeNBT());
+        nbt.putBoolean("LootDisabled", lootDisabled);
+        nbt.putInt("Town", town);
+        nbt.put("Custom", custom);
     }
 
     @Override
@@ -437,7 +421,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     public void setAnimation(String animation, Object... object) {
         try {
             this.animation = Animation.create(animation).withData(object);
-            PenguinNetwork.sendToNearby(this, new PacketSetAnimation(getEntityId(), this.animation.getID(), this.animation.serializeNBT()));
+            PenguinNetwork.sendToNearby(this, new PacketSetAnimation(getId(), this.animation.getID(), this.animation.serializeNBT()));
         } catch (IllegalAccessException | InstantiationException e) {
             e.printStackTrace();
         }

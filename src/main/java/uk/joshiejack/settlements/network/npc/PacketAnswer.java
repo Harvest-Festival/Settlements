@@ -1,51 +1,42 @@
 package uk.joshiejack.settlements.network.npc;
 
-import io.netty.buffer.ByteBuf;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.Action;
-import uk.joshiejack.settlements.entity.ai.action.chat.ActionAsk;
-import uk.joshiejack.penguinlib.network.PenguinPacket;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
-import net.minecraftforge.fml.relauncher.Side;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import org.jetbrains.annotations.NotNull;
+import uk.joshiejack.penguinlib.PenguinLib;
+import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
+import uk.joshiejack.penguinlib.util.registry.Packet;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.Action;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionAsk;
 
-@PenguinLoader(side = Side.SERVER)
-public class PacketAnswer extends PenguinPacket {
-    private int npcID;
-    private ResourceLocation registryName;
-    private boolean isQuest;
-    private int option;
+@Packet(PacketFlow.SERVERBOUND)
+public record PacketAnswer(int npcID, ResourceLocation registryName, boolean isQuest, int option) implements PenguinPacket {
+    public static final ResourceLocation ID = PenguinLib.prefix("answer_question");
 
-    public PacketAnswer() {}
-    public PacketAnswer(int npcID, ResourceLocation registryName, boolean isQuest, int option) {
-        this.npcID = npcID;
-        this.registryName = registryName;
-        this.isQuest = isQuest;
-        this.option = option;
+    @Override
+    public @NotNull ResourceLocation id() {
+        return ID;
+    }
+
+    public PacketAnswer(FriendlyByteBuf buf) {
+        this(buf.readInt(), buf.readResourceLocation(), buf.readBoolean(), buf.readByte());
     }
 
     @Override
-    public void toBytes(ByteBuf buf) {
+    public void write(FriendlyByteBuf buf) {
         buf.writeInt(npcID);
-        ByteBufUtils.writeUTF8String(buf, registryName.toString());
+        buf.writeResourceLocation(registryName);
         buf.writeBoolean(isQuest);
         buf.writeByte(option);
     }
 
     @Override
-    public void fromBytes(ByteBuf buf) {
-        npcID = buf.readInt();
-        registryName = new ResourceLocation(ByteBufUtils.readUTF8String(buf));
-        isQuest = buf.readBoolean();
-        option = buf.readByte();
-    }
-
-    @Override
-    public void handlePacket(EntityPlayer player) {
-        Entity entity = player.world.getEntityByID(npcID);
+    public void handle(Player player) {
+        Entity entity = player.level().getEntity(npcID);
         if (entity instanceof EntityNPC) {
             Action action = ((EntityNPC) entity).getMentalAI().getCurrent();
             (((EntityNPC)entity)).removeTalking(player);

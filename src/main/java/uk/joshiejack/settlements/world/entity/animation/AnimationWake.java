@@ -1,9 +1,8 @@
-package uk.joshiejack.settlements.client.animation;
+package uk.joshiejack.settlements.world.entity.animation;
 
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
-@PenguinLoader("wakeup")
+//@PenguinLoader("wakeup")
 public class AnimationWake extends Animation {
     @Override
     public void play(EntityNPC npc) {

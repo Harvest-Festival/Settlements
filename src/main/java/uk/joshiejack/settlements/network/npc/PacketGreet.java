@@ -1,32 +1,38 @@
 package uk.joshiejack.settlements.network.npc;
 
-import uk.joshiejack.settlements.client.gui.GuiNPCChat;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.chat.ActionGreet;
-import uk.joshiejack.penguinlib.client.gui.Chatter;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.client.Minecraft;
-import net.minecraft.entity.Entity;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraftforge.fml.relauncher.Side;
-import net.minecraftforge.fml.relauncher.SideOnly;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.protocol.PacketFlow;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.Entity;
+import net.minecraft.world.entity.player.Player;
+import uk.joshiejack.penguinlib.PenguinLib;
+import uk.joshiejack.penguinlib.util.registry.Packet;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionGreet;
 
 @SuppressWarnings("unused")
-@PenguinLoader(side = Side.CLIENT)
+@Packet(PacketFlow.CLIENTBOUND)
 public class PacketGreet extends PacketButtonLoad<ActionGreet> {
-    public PacketGreet() {}
-    public PacketGreet(EntityPlayer player, EntityNPC npc, ActionGreet action) {
+    public static final ResourceLocation ID = PenguinLib.prefix("greet");
+
+    @Override
+    public ResourceLocation id() {
+        return ID;
+    }
+
+    public PacketGreet(FriendlyByteBuf buf) {
+        super(buf);
+    }
+    public PacketGreet(Player player, EntityNPC npc, ActionGreet action) {
         super(player, npc, action);
     }
 
-    @SideOnly(Side.CLIENT)
     @Override
-    public void handlePacket(EntityPlayer player) {
-        super.handlePacket(player);
-        Entity entity = player.world.getEntityByID(npcID);
-        if (entity instanceof EntityNPC) {
-            EntityNPC npc = (EntityNPC) entity;
-            Minecraft.getMinecraft().displayGuiScreen(new GuiNPCChat(npc, new Chatter(npc.getInfo().getGreeting(player.world.rand)), player.getDisplayNameString(), entity.getName()));
+    public void handle(Player player) {
+        super.handle(player);
+        Entity entity = player.level().getEntity(npcID);
+        if (entity instanceof EntityNPC npc) {
+            //TODOD Minecraft.getInstance().displayGuiScreen(new GuiNPCChat(npc, new Chatter(npc.getInfo().getGreeting(player.world.rand)), player.getDisplayNameString(), entity.getName()));
         }
     }
 }

@@ -1,25 +1,27 @@
-package uk.joshiejack.settlements.entity.ai;
+package uk.joshiejack.settlements.world.entity.ai;
 
 import com.google.common.collect.Lists;
-import net.minecraft.entity.ai.EntityAIBase;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.util.EnumActionResult;
-import net.minecraftforge.common.util.INBTSerializable;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.Action;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
+import net.minecraft.world.InteractionResult;
+import net.minecraft.world.entity.ai.goal.Goal;
+import net.neoforged.neoforge.common.util.INBTSerializable;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.Action;
 
 import java.util.Deque;
+import java.util.EnumSet;
 import java.util.LinkedList;
 
-public class EntityAIActionQueue extends EntityAIBase implements INBTSerializable<NBTTagList> {
+public class EntityAIActionQueue extends Goal implements INBTSerializable<ListTag> {
     private final Deque<Action> queue = new LinkedList<>();
     private final EntityNPC npc;
     private Action current;
 
-    public EntityAIActionQueue(EntityNPC npc, int mutex) {
+    public EntityAIActionQueue(EntityNPC npc, Flag flag) {
         this.npc = npc;
-        this.setMutexBits(mutex);
+        this.setFlags(EnumSet.of(flag));
+        //this.setMutexBits(mutex);
     }
 
     public Deque<Action> all() {
@@ -48,17 +50,17 @@ public class EntityAIActionQueue extends EntityAIBase implements INBTSerializabl
     }
 
     @Override
-    public boolean shouldExecute() {
+    public boolean canUse() {
         return current != null || !queue.isEmpty();
     }
 
     @Override
-    public void updateTask() {
+    public void tick() {
         if (current == null) current = queue.peek();
         if (current != null) {
-            EnumActionResult result = current.execute(npc); //Execute the task
-            if (result == EnumActionResult.FAIL) queue.clear();
-            else if (result == EnumActionResult.SUCCESS) {
+            InteractionResult result = current.execute(npc); //Execute the task
+            if (result == InteractionResult.FAIL) queue.clear();
+            else if (result == InteractionResult.SUCCESS) {
                 queue.remove(); //Remove the head of the queue
                 current = queue.peek(); //Grab the new head of the queue
             }
@@ -66,29 +68,29 @@ public class EntityAIActionQueue extends EntityAIBase implements INBTSerializabl
     }
 
     @Override
-    public void startExecuting() {
-        npc.getNavigator().clearPath();
+    public void start() {
+       //TODO: Clear Path? npc.getNavigator().clearPath();
     }
 
     @Override
-    public NBTTagList serializeNBT() {
-        NBTTagList list = new NBTTagList();
+    public ListTag serializeNBT() {
+        ListTag list = new ListTag();
         queue.forEach(action -> {
-            NBTTagCompound tag = new NBTTagCompound();
-            tag.setString("Type", action.getType());
-            tag.setTag("Data", action.serializeNBT());
-            list.appendTag(tag);
+            CompoundTag tag = new CompoundTag();
+            tag.putString("Type", action.getType());
+            tag.put("Data", action.serializeNBT());
+            list.add(tag);
         });
 
         return list;
     }
 
     @Override
-    public void deserializeNBT(NBTTagList list) {
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound tag = list.getCompoundTagAt(i);
+    public void deserializeNBT(ListTag list) {
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag tag = list.getCompound(i);
             Action action = Action.createOfType(tag.getString("Type"));
-            action.deserializeNBT(tag.getCompoundTag("Data"));
+            action.deserializeNBT(tag.getCompound("Data"));
             queue.add(action); //This might help ;)
         }
     }

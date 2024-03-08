@@ -1,15 +1,15 @@
-package uk.joshiejack.settlements.client.gui;
+package uk.joshiejack.settlements.world.entity.npc.button;
 
 import com.google.common.collect.Lists;
-import io.netty.buffer.ByteBuf;
-import uk.joshiejack.settlements.entity.EntityNPC;
+import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.entity.player.Player;
+import net.minecraft.world.item.ItemStack;
 import uk.joshiejack.penguinlib.scripting.Interpreter;
-import uk.joshiejack.penguinlib.scripting.Scripting;
-import uk.joshiejack.penguinlib.scripting.wrappers.ItemStackJS;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.item.ItemStack;
-import net.minecraft.util.ResourceLocation;
-import net.minecraftforge.fml.common.network.ByteBufUtils;
+import uk.joshiejack.penguinlib.scripting.ScriptFactory;
+import uk.joshiejack.penguinlib.scripting.wrapper.ItemStackJS;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
 
 import java.util.List;
 
@@ -21,10 +21,10 @@ public class NPCButtons {
     }
 
     //Called on the server to let the client know
-    public static List<ButtonData> getForDisplay(EntityNPC npc, EntityPlayer player) {
+    public static List<ButtonData> getForDisplay(EntityNPC npc, Player player) {
         List<ButtonData> list = Lists.newArrayList();
         for (ButtonData button: BUTTONS) {
-            Interpreter interpreter = Scripting.get(button.getScript());
+            Interpreter <?> interpreter = ScriptFactory.getScript(button.getScript());
             if (interpreter != null && interpreter.isTrue("canDisplay", npc, player)) {
                 ButtonData add = new ButtonData(button, interpreter);
                 interpreter.callFunction("setupButton", npc, player, add);
@@ -37,13 +37,13 @@ public class NPCButtons {
 
     public static class ButtonData {
         private final ResourceLocation scriptID;
-        private String name;
+        private Component name;
         private ItemStack icon;
-        private Interpreter interpreter;
+        private Interpreter<?> interpreter;
 
         /* For data transfer */
-        public ButtonData (ButtonData data, Interpreter interpreter) {
-            this.name = "Unitialized Button";
+        public ButtonData (ButtonData data, Interpreter<?> interpreter) {
+            this.name = Component.literal("Unitialized Button");
             this.icon = ItemStack.EMPTY;
             this.scriptID = data.scriptID;
             this.interpreter = interpreter;
@@ -54,29 +54,32 @@ public class NPCButtons {
             this.scriptID = scriptID;
         }
 
-        public ButtonData(ByteBuf buf) {
-            this.name = ByteBufUtils.readUTF8String(buf);
-            this.icon = ByteBufUtils.readItemStack(buf);
-            this.scriptID = new ResourceLocation(ByteBufUtils.readUTF8String(buf));
+        public ButtonData(FriendlyByteBuf buf) {
+            this.name = buf.readComponent();
+            this.icon = buf.readItem();
+            this.scriptID = buf.readResourceLocation();
         }
 
-        public void toBytes(ByteBuf buf) {
-            ByteBufUtils.writeUTF8String(buf, name);
-            ByteBufUtils.writeItemStack(buf, icon);
-            ByteBufUtils.writeUTF8String(buf, scriptID.toString());
+        public void toBytes(FriendlyByteBuf buf) {
+            buf.writeComponent(name);
+            buf.writeItem(icon);
+            buf.writeResourceLocation(scriptID);
         }
 
         public ResourceLocation getScript() {
             return scriptID;
         }
 
-        public void setName(String name) {
-            this.name = name;
-            this.name = interpreter.getLocalizedKey(scriptID, name);
+        public void setTranslatableName(String name) {
+            this.name = Component.translatable(name);
+        }
+
+        public void setLiteralName(String name) {
+            this.name = Component.literal(name);
         }
 
         public void setIcon(ItemStackJS stack) {
-            this.icon = stack.penguinScriptingObject.copy();
+            this.icon = stack.get().copy();
             this.icon.setCount(1);
         }
 
@@ -84,7 +87,7 @@ public class NPCButtons {
             return icon;
         }
 
-        public String getName() {
+        public Component getName() {
             return name;
         }
     }

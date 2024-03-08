@@ -1,4 +1,4 @@
-package uk.joshiejack.settlements.entity.ai.action;
+package uk.joshiejack.settlements.world.entity.ai.action;
 
 public abstract class ActionPhysical extends Action {
     @Override

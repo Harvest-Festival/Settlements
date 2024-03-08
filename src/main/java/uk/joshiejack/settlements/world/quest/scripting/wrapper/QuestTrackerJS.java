@@ -28,7 +28,7 @@ public class QuestTrackerJS extends AbstractJS<QuestTracker> {
     }
 
     public void complete(PlayerJS player, String name) {
-        QuestSavedData.get((ServerLevel) player.penguinScriptingObject.level()).markCompleted(player.penguinScriptingObject, Settlements.Registries.QUESTS.get(new ResourceLocation(name)));
+        QuestSavedData.get((ServerLevel) player.get().level()).markCompleted(player.get(), Settlements.Registries.QUESTS.get(new ResourceLocation(name)));
     }
 
     public void call(String q, String function, Object... data) {

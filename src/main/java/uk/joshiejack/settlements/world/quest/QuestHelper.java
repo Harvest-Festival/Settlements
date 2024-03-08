@@ -1,16 +1,19 @@
 package uk.joshiejack.settlements.world.quest;
 
 import joptsimple.internal.Strings;
+import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.packs.resources.ResourceManager;
 import net.minecraft.world.entity.player.Player;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.apache.commons.io.IOUtils;
 import uk.joshiejack.penguinlib.scripting.ScriptLoader;
 import uk.joshiejack.penguinlib.util.PenguinGroup;
 import uk.joshiejack.penguinlib.util.helper.TagHelper;
 import uk.joshiejack.settlements.Settlements;
+import uk.joshiejack.settlements.world.entity.npc.status.StatusTracker;
 import uk.joshiejack.settlements.world.level.QuestSavedData;
 import uk.joshiejack.settlements.world.quest.data.QuestData;
 import uk.joshiejack.settlements.world.quest.data.QuestTracker;
@@ -31,7 +34,7 @@ public class QuestHelper {
         return QuestSavedData.get((ServerLevel) player.level()).getData(player, script);
     }
 
-    public static ListTag writeUUIDToTrackerMap(Map<UUID, QuestTracker> map) {
+    public static ListTag writeUUIDToTrackerMap(Map<UUID, ? extends INBTSerializable<CompoundTag>> map) {
         return TagHelper.writeMap(map,
                 (tag, tracker) -> tag.putString("UUID", tracker.toString()),
                 (tag, tracker) -> tag.put("Data", tracker.serializeNBT()));
@@ -43,6 +46,16 @@ public class QuestHelper {
                 (tag2) -> {
                     QuestTracker tracker1 = new QuestTracker(type);
                     tracker1.deserializeNBT(tag2.getCompound("Data"));
+                    return tracker1;
+                });
+    }
+
+    public static void readUUIDToStatusTrackerMap(ListTag list, Map<UUID, StatusTracker> map) {
+        TagHelper.readMap(list, map,
+                (tag1) -> UUID.fromString(tag1.getString("UUID")),
+                (tag2, uuid) -> {
+                    StatusTracker tracker1 = new StatusTracker(uuid);
+                    tracker1.deserializeNBT(tag2);
                     return tracker1;
                 });
     }

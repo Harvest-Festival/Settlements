@@ -1,16 +1,15 @@
-package uk.joshiejack.settlements.entity.ai.action.status;
+package uk.joshiejack.settlements.world.entity.ai.action.status;
 
 import joptsimple.internal.Strings;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.ActionMental;
-import uk.joshiejack.settlements.scripting.wrappers.NPCStatusJS;
-import uk.joshiejack.penguinlib.scripting.WrapperRegistry;
-import uk.joshiejack.penguinlib.util.PenguinLoader;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.EnumActionResult;
-import net.minecraft.util.ResourceLocation;
+import net.minecraft.nbt.CompoundTag;
+import net.minecraft.resources.ResourceLocation;
+import net.minecraft.world.InteractionResult;
+import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
+import uk.joshiejack.settlements.scripting.wrapper.NPCStatusJS;
+import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-@PenguinLoader("set_npc_status")
+//@PenguinLoader("set_npc_status")
 public class ActionSetNPCStatus extends ActionMental {
     private String npcRegistryName = Strings.EMPTY;
     private String status;
@@ -33,28 +32,28 @@ public class ActionSetNPCStatus extends ActionMental {
     }
 
     @Override
-    public EnumActionResult execute(EntityNPC npc) {
+    public InteractionResult execute(EntityNPC npc) {
         if (player != null) {
             NPCStatusJS wrapper = WrapperRegistry.wrap(npcRegistryName == null ? npc.getBaseNPC() : new ResourceLocation(npcRegistryName));
             wrapper.set(WrapperRegistry.wrap(player), status, value);
         }
 
-        return EnumActionResult.SUCCESS;
+        return InteractionResult.SUCCESS;
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        tag.setString("RegistryName", npcRegistryName);
-        tag.setString("Status", status);
-        tag.setInteger("Value", value);
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("RegistryName", npcRegistryName);
+        tag.putString("Status", status);
+        tag.putInt("Value", value);
         return tag;
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserializeNBT(CompoundTag tag) {
         npcRegistryName = tag.getString("RegistryName");
         status = tag.getString("Status");
-        value = tag.getInteger("Value");
+        value = tag.getInt("Value");
     }
 }
