@@ -1,0 +1,8 @@
+{
+  "item": "minecraft:diamond_axe",
+  "template": {
+    "sizeX": 5,
+    "sizeY": 2,
+    "sizeZ": 3
+  }
+}
