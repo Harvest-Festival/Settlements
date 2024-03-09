@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
 import uk.joshiejack.settlements.scripting.wrapper.NPCStatusJS;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //@PenguinLoader("set_npc_status")
@@ -32,7 +32,7 @@ public class ActionSetNPCStatus extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) {
             NPCStatusJS wrapper = WrapperRegistry.wrap(npcRegistryName == null ? npc.getBaseNPC() : new ResourceLocation(npcRegistryName));
             wrapper.set(WrapperRegistry.wrap(player), status, value);

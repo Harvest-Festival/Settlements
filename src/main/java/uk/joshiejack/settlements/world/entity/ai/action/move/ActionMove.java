@@ -4,7 +4,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 //TODO @PenguinLoader("move")
@@ -20,7 +20,7 @@ public class ActionMove extends ActionPhysical {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         npc.getNavigation().moveTo(target.getX() + 0.5, target.getY(), target.getZ() + 0.5, speed);
         if (npc.distanceToSqr(target.getX() + 0.5, target.getY(), target.getZ() + 0.5) < 1) {
             return InteractionResult.SUCCESS;

@@ -6,7 +6,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
 import uk.joshiejack.settlements.world.entity.npc.button.NPCButtons;
 
@@ -24,7 +24,7 @@ public class PacketButtonLoad<A extends Action> implements PenguinPacket {
     protected A action;
     protected int npcID;
 
-    public PacketButtonLoad(Player player, EntityNPC npc, A action) {
+    public PacketButtonLoad(Player player, NPCMob npc, A action) {
         this.npcID = npc.getId();
         this.action = action;
         this.list = NPCButtons.getForDisplay(npc, player);

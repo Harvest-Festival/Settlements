@@ -2,8 +2,8 @@ package uk.joshiejack.settlements.data;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.data.PackOutput;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Items;
 import net.minecraft.world.level.block.Blocks;
 import uk.joshiejack.penguinlib.data.generator.AbstractPenguinRegistryProvider;
 import uk.joshiejack.penguinlib.util.registry.ReloadableRegistry;
@@ -38,6 +38,6 @@ public class SettlementsBuildings extends AbstractPenguinRegistryProvider<Buildi
             }
         }
 
-        map.put(new ResourceLocation(Settlements.MODID, "test"), new Building(new Template(original, tempX, tempY, tempZ), Items.DIAMOND_AXE));
+        map.put(new ResourceLocation(Settlements.MODID, "test"), new Building(new Template(original, tempX, tempY, tempZ), Component.literal("Test Building")));
     }
 }

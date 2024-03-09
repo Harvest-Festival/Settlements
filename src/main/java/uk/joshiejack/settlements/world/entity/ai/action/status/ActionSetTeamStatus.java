@@ -5,7 +5,7 @@ import net.minecraft.world.InteractionResult;
 import uk.joshiejack.penguinlib.scripting.wrapper.ServerLevelJS;
 import uk.joshiejack.penguinlib.scripting.wrapper.TeamJS;
 import uk.joshiejack.penguinlib.world.team.PenguinTeams;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //TODO: @PenguinLoader("set_team_status")
@@ -21,7 +21,7 @@ public class ActionSetTeamStatus extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) {
             new TeamJS(PenguinTeams.getTeamForPlayer(player)).status().set(new ServerLevelJS((ServerLevel) npc.level()), status, value);
         }

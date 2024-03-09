@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
 import uk.joshiejack.penguinlib.util.registry.Packet;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
 
@@ -37,11 +37,11 @@ public record PacketEndChat(int npcID) implements PenguinPacket {
     @Override
     public void handle(Player player) {
         Entity entity = player.level().getEntity(npcID);
-        if (entity instanceof EntityNPC npc) {
+        if (entity instanceof NPCMob npc) {
             Action action = npc.getMentalAI().getCurrent();
             if (action instanceof ActionChat chat) {
                 npc.removeTalking(player);
-                chat.onGuiClosed(player, (EntityNPC) entity);
+                chat.onGuiClosed(player, (NPCMob) entity);
             }
         }
     }

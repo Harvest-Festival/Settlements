@@ -6,7 +6,7 @@ import net.minecraft.nbt.ListTag;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
 
 import java.util.Deque;
@@ -15,10 +15,10 @@ import java.util.LinkedList;
 
 public class EntityAIActionQueue extends Goal implements INBTSerializable<ListTag> {
     private final Deque<Action> queue = new LinkedList<>();
-    private final EntityNPC npc;
+    private final NPCMob npc;
     private Action current;
 
-    public EntityAIActionQueue(EntityNPC npc, Flag flag) {
+    public EntityAIActionQueue(NPCMob npc, Flag flag) {
         this.npc = npc;
         this.setFlags(EnumSet.of(flag));
         //this.setMutexBits(mutex);

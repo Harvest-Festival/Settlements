@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.util.registry.Packet;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionGreet;
 
 @SuppressWarnings("unused")
@@ -23,7 +23,7 @@ public class PacketGreet extends PacketButtonLoad<ActionGreet> {
     public PacketGreet(FriendlyByteBuf buf) {
         super(buf);
     }
-    public PacketGreet(Player player, EntityNPC npc, ActionGreet action) {
+    public PacketGreet(Player player, NPCMob npc, ActionGreet action) {
         super(player, npc, action);
     }
 
@@ -31,7 +31,7 @@ public class PacketGreet extends PacketButtonLoad<ActionGreet> {
     public void handle(Player player) {
         super.handle(player);
         Entity entity = player.level().getEntity(npcID);
-        if (entity instanceof EntityNPC npc) {
+        if (entity instanceof NPCMob npc) {
             //TODOD Minecraft.getInstance().displayGuiScreen(new GuiNPCChat(npc, new Chatter(npc.getInfo().getGreeting(player.world.rand)), player.getDisplayNameString(), entity.getName()));
         }
     }

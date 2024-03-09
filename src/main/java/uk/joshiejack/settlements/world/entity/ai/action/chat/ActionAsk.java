@@ -11,7 +11,7 @@ import uk.joshiejack.penguinlib.scripting.Interpreter;
 import uk.joshiejack.penguinlib.scripting.ScriptFactory;
 import uk.joshiejack.settlements.Settlements;
 import uk.joshiejack.settlements.network.npc.PacketAsk;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 import uk.joshiejack.settlements.world.level.QuestSavedData;
@@ -56,7 +56,7 @@ public class ActionAsk extends ActionMental implements ActionChat {
     }
 
     @Override
-    public void onGuiClosed(Player player, EntityNPC npc, Object... parameters) {
+    public void onGuiClosed(Player player, NPCMob npc, Object... parameters) {
         answered = true; //To allow this to exit the forever loop
         if (parameters.length == 1) {
             int option = (int) parameters[0]; //Always the case
@@ -68,7 +68,7 @@ public class ActionAsk extends ActionMental implements ActionChat {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (!asked && player != null) {
             asked = true; //Mark asked as true
             PenguinNetwork.sendToClient(player, new PacketAsk(player, npc, this));

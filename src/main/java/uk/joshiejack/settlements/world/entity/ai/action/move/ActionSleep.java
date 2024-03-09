@@ -5,7 +5,7 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 import java.util.Set;
@@ -22,7 +22,7 @@ public class ActionSleep extends ActionPhysical {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         // Find the closest bed for this npc
         // Teleport them there and make them sleep in it
 

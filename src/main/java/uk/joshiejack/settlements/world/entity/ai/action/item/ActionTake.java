@@ -7,7 +7,7 @@ import net.minecraft.tags.ItemTags;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import uk.joshiejack.penguinlib.util.helper.InventoryHelper;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 import java.util.function.Function;
@@ -25,7 +25,7 @@ public class ActionTake extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) InventoryHelper.takeItemsInInventory(player, asFunction(), amount);
         return InteractionResult.SUCCESS;
     }

@@ -3,7 +3,7 @@ package uk.joshiejack.settlements.world.entity.ai.action.item;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //TODO@PenguinLoader("take_held")
@@ -19,7 +19,7 @@ public class ActionTakeHeldItem extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) player.getItemInHand(hand).shrink(amount);
         return InteractionResult.SUCCESS;
     }

@@ -5,7 +5,7 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 //TODO@PenguinLoader("attack")
@@ -24,7 +24,7 @@ public class ActionAttack extends ActionPhysical {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC attacker) {
+    public InteractionResult execute(NPCMob attacker) {
         if (ai == null) {
             ai = new MeleeAttackGoal(attacker, 1.0D, false);
         }
@@ -60,7 +60,7 @@ public class ActionAttack extends ActionPhysical {
         return InteractionResult.SUCCESS;
     }
 
-    private void checkAndPerformAttack(EntityNPC attacker, LivingEntity enemy, double distToEnemySqr) {
+    private void checkAndPerformAttack(NPCMob attacker, LivingEntity enemy, double distToEnemySqr) {
         double d0 = getAttackReachSqr(attacker, enemy);
 
         if (distToEnemySqr <= d0 && this.attackTick <= 0) {
@@ -70,7 +70,7 @@ public class ActionAttack extends ActionPhysical {
         }
     }
 
-    protected double getAttackReachSqr(EntityNPC attacker, LivingEntity attackTarget) {
+    protected double getAttackReachSqr(NPCMob attacker, LivingEntity attackTarget) {
         return attacker.getBbWidth() * 2.0F * attacker.getBbWidth() * 2.0F + attackTarget.getBbWidth();
     }
 

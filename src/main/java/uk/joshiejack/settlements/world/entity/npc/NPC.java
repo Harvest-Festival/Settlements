@@ -33,8 +33,7 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
             Codec.INT.fieldOf("insideColor").forGetter(NPC::getInsideColor),
             Codec.INT.fieldOf("outsideColor").forGetter(NPC::getOutsideColor))
             .apply(inst, NPC::new));
-
-    private static final ResourceLocation TEXTURE_DEFAULT = new ResourceLocation("textures/entity/steve.png");
+    public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation(Settlements.MODID, "textures/entity/missing.png");
     private static final ResourceLocation NULL_ID = new ResourceLocation(Settlements.MODID, "null");
     public static final NPC NULL = new NPC(null, null, null, null, NPCClass.NULL, 0xFFFFFF, 0x000000).setOccupation(Strings.EMPTY).setNPCClass(NPCClass.NULL);
     private final Object2IntMap<String> data = new Object2IntOpenHashMap<>();
@@ -182,7 +181,7 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     }
 
     @Override
-    public Component getLocalizedName() {
+    public Component name() {
         return localizedName != null ? Component.literal(localizedName): Component.translatable(getUnlocalizedKey());
     }
 
@@ -199,7 +198,7 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
             }
         }
 
-        return skin == null ? TEXTURE_DEFAULT : skin;
+        return skin == null ? MISSING_TEXTURE : skin;
     }
 
     @Override

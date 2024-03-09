@@ -9,7 +9,7 @@ import net.minecraft.world.item.ItemStack;
 import uk.joshiejack.penguinlib.scripting.Interpreter;
 import uk.joshiejack.penguinlib.scripting.ScriptFactory;
 import uk.joshiejack.penguinlib.scripting.wrapper.ItemStackJS;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 
 import java.util.List;
 
@@ -21,7 +21,7 @@ public class NPCButtons {
     }
 
     //Called on the server to let the client know
-    public static List<ButtonData> getForDisplay(EntityNPC npc, Player player) {
+    public static List<ButtonData> getForDisplay(NPCMob npc, Player player) {
         List<ButtonData> list = Lists.newArrayList();
         for (ButtonData button: BUTTONS) {
             Interpreter <?> interpreter = ScriptFactory.getScript(button.getScript());

@@ -7,7 +7,7 @@ import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.util.registry.Packet;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionSay;
 
 @Packet(PacketFlow.CLIENTBOUND)
@@ -22,7 +22,7 @@ public class PacketSay extends PacketButtonLoad<ActionSay> {
     public PacketSay(FriendlyByteBuf buf) {
         super(buf);
     }
-    public PacketSay(Player player, EntityNPC npc, ActionSay action) {
+    public PacketSay(Player player, NPCMob npc, ActionSay action) {
         super(player, npc, action);
     }
 
@@ -30,7 +30,7 @@ public class PacketSay extends PacketButtonLoad<ActionSay> {
     public void handle(Player player) {
         super.handle(player); //Super first!
         Entity entity = player.level().getEntity(npcID);
-        if (entity instanceof EntityNPC) {
+        if (entity instanceof NPCMob) {
            //TODO:  Minecraft.getMinecraft().displayGuiScreen(new GuiNPCChat((EntityNPC)entity, new Chatter(GuiNPCAsk.modify(action.registryName, action.isQuest, action.text)), action.formatting));
         }
     }

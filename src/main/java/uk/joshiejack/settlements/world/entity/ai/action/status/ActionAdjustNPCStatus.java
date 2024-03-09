@@ -7,7 +7,7 @@ import net.minecraft.world.InteractionResult;
 import uk.joshiejack.penguinlib.scripting.wrapper.PlayerJS;
 import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
 import uk.joshiejack.settlements.scripting.wrapper.NPCStatusJS;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //TODO: @PenguinLoader("adjust_ncp_status")
@@ -40,7 +40,7 @@ public class ActionAdjustNPCStatus extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) {
             NPCStatusJS wrapper = WrapperRegistry.wrap(npcRegistryName.isEmpty() ? npc.getBaseNPC() : new ResourceLocation(npcRegistryName));
             PlayerJS wrappedPlayer = WrapperRegistry.wrap(player);

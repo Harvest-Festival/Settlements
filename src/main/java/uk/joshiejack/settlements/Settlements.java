@@ -11,7 +11,6 @@ import net.minecraft.server.packs.PackType;
 import net.minecraft.server.packs.metadata.pack.PackMetadataSection;
 import net.minecraft.util.InclusiveRange;
 import net.minecraft.world.item.Item;
-import net.minecraft.world.item.Items;
 import net.neoforged.bus.api.IEventBus;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
@@ -31,6 +30,8 @@ import uk.joshiejack.settlements.world.building.Template;
 import uk.joshiejack.settlements.world.entity.SettlementsEntities;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftQuality;
+import uk.joshiejack.settlements.world.item.SettlementsCreativeTab;
+import uk.joshiejack.settlements.world.item.SettlementsItems;
 import uk.joshiejack.settlements.world.quest.Quest;
 import uk.joshiejack.settlements.world.quest.settings.Settings;
 
@@ -46,6 +47,8 @@ public class Settlements {
     public Settlements(IEventBus eventBus) {
         Registries.init();
         SettlementsEntities.ENTITIES.register(eventBus);
+        SettlementsItems.ITEMS.register(eventBus);
+        SettlementsCreativeTab.CREATIVE_MODE_TABS.register(eventBus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SettlementsConfig.create());
     }
 
@@ -78,7 +81,7 @@ public class Settlements {
 
     public static class Registries {
         public static final ResourceLocation NONE = new ResourceLocation(Settlements.MODID, "none");
-        public static final ReloadableRegistry<Building> BUILDINGS = new ReloadableRegistry<>(Settlements.MODID, "buildings", Building.CODEC, new Building(Template.EMPTY, Items.AIR), true);
+        public static final ReloadableRegistry<Building> BUILDINGS = new ReloadableRegistry<>(Settlements.MODID, "buildings", Building.CODEC, new Building(Template.EMPTY, Component.empty()), true);
         public static final ReloadableRegistry<Quest> QUESTS = new ReloadableRegistry<>(Settlements.MODID, "quests", Quest.CODEC, new Quest(Settings.DEFAULT), true);
         public static final ReloadableRegistry<GiftQuality> GIFT_QUALITIES = new ReloadableRegistry<>(Settlements.MODID, "gift_qualities", GiftQuality.CODEC, GiftQuality.NORMAL, true);
         public static final ReloadableRegistry<NPC> NPCS = new ReloadableRegistry<>(Settlements.MODID, "npcs", NPC.CODEC, NPC.NULL, true);

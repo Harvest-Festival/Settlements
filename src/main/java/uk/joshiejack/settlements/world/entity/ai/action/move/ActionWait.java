@@ -2,7 +2,7 @@ package uk.joshiejack.settlements.world.entity.ai.action.move;
 
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 //@PenguinLoader("wait")
@@ -17,7 +17,7 @@ public class ActionWait extends ActionPhysical {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (ticks < targetTicks) {
             //TODO: Find clear path npc.getNavigator().clearPath();
             ticks++;

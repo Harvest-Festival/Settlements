@@ -7,7 +7,7 @@ import net.neoforged.neoforge.items.ItemHandlerHelper;
 import org.apache.logging.log4j.Level;
 import uk.joshiejack.penguinlib.scripting.wrapper.ItemStackJS;
 import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //@PenguinLoader("give_item")
@@ -29,7 +29,7 @@ public class ActionGiftItem extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) {
             ItemHandlerHelper.giveItemToPlayer(player, stack);
         }

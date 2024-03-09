@@ -15,7 +15,7 @@ import uk.joshiejack.settlements.Settlements;
 @Mod.EventBusSubscriber(modid = Settlements.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
 public class SettlementsEntities {
     public static final DeferredRegister<EntityType<?>> ENTITIES = DeferredRegister.create(Registries.ENTITY_TYPE, Settlements.MODID);
-    public static final DeferredHolder<EntityType<?>, EntityType<EntityNPC>> NPC = createEntity("npc", EntityNPC::new, 0.6F, 1.95F);
+    public static final DeferredHolder<EntityType<?>, EntityType<NPCMob>> NPC = createEntity("npc", NPCMob::new, 0.6F, 1.95F);
 
     private static <E extends Entity> DeferredHolder<EntityType<?>, EntityType<E>> createEntity(String id, EntityType.EntityFactory<E> factory, float width, float height) {
         return createEntity(new ResourceLocation(Settlements.MODID, id), factory, width, height);
@@ -30,6 +30,6 @@ public class SettlementsEntities {
 
     @SubscribeEvent
     public static void addEntityAttributes(EntityAttributeCreationEvent event) {
-        event.put(NPC.get(), EntityNPC.createAttributes().build());
+        event.put(NPC.get(), NPCMob.createAttributes().build());
     }
 }

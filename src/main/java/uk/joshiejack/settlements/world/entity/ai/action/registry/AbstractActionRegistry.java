@@ -5,7 +5,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import uk.joshiejack.penguinlib.util.registry.ReloadableRegistry;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 public abstract class AbstractActionRegistry<O extends ReloadableRegistry.PenguinRegistry<O>> extends ActionMental {
@@ -23,7 +23,7 @@ public abstract class AbstractActionRegistry<O extends ReloadableRegistry.Pengui
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         if (player != null) {
             O p = registry.get(resource);
             if (p != null) {

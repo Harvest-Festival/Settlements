@@ -2,14 +2,14 @@ package uk.joshiejack.settlements.world.entity.ai;
 
 import net.minecraft.world.entity.ai.goal.Goal;
 import net.minecraft.world.entity.player.Player;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 
 import java.util.EnumSet;
 
 public class EntityAITalkingTo extends Goal {
-    private final EntityNPC npc;
+    private final NPCMob npc;
 
-    public EntityAITalkingTo(EntityNPC npc) {
+    public EntityAITalkingTo(NPCMob npc) {
         this.npc = npc;
         this.setFlags(EnumSet.of(Flag.JUMP));
     }

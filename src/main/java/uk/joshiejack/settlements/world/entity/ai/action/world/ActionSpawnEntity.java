@@ -7,7 +7,7 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import uk.joshiejack.penguinlib.scripting.wrapper.PositionJS;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //TODO: @PenguinLoader("spawn_entity")
@@ -25,7 +25,7 @@ public class ActionSpawnEntity extends ActionMental {
     }
 
     @Override
-    public InteractionResult execute(EntityNPC npc) {
+    public InteractionResult execute(NPCMob npc) {
         Entity entity = BuiltInRegistries.ENTITY_TYPE.get(entityName).create(player.level());
         if (entity != null) {
             entity.setPos(pos.getX(), pos.getY(), pos.getZ());

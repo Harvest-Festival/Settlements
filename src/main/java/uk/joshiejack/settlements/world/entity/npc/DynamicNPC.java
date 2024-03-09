@@ -154,7 +154,7 @@ public class DynamicNPC implements NPCInfo {
     }
 
     @Override
-    public Component getLocalizedName() {
+    public Component name() {
         return Component.literal(name);
     }
 

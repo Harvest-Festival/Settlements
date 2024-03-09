@@ -10,7 +10,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
 import uk.joshiejack.penguinlib.util.registry.Packet;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 
 @Packet(PacketFlow.CLIENTBOUND)
 public record PacketSetAnimation(int npcID, String animation, CompoundTag tag) implements PenguinPacket {
@@ -35,8 +35,8 @@ public record PacketSetAnimation(int npcID, String animation, CompoundTag tag) i
     @Override
     public void handle(Player player) {
         Entity entity = player.level().getEntity(npcID);
-        if (entity instanceof EntityNPC) {
-            ((EntityNPC)entity).setAnimation(animation, tag);
+        if (entity instanceof NPCMob) {
+            ((NPCMob)entity).setAnimation(animation, tag);
         }
     }
 }

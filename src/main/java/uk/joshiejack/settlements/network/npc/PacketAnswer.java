@@ -9,7 +9,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
 import uk.joshiejack.penguinlib.util.registry.Packet;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionAsk;
 
@@ -37,11 +37,11 @@ public record PacketAnswer(int npcID, ResourceLocation registryName, boolean isQ
     @Override
     public void handle(Player player) {
         Entity entity = player.level().getEntity(npcID);
-        if (entity instanceof EntityNPC) {
-            Action action = ((EntityNPC) entity).getMentalAI().getCurrent();
-            (((EntityNPC)entity)).removeTalking(player);
+        if (entity instanceof NPCMob) {
+            Action action = ((NPCMob) entity).getMentalAI().getCurrent();
+            (((NPCMob)entity)).removeTalking(player);
             if (action instanceof ActionAsk) {
-                ((ActionAsk)action).onGuiClosed(player, (EntityNPC) entity, option);
+                ((ActionAsk)action).onGuiClosed(player, (NPCMob) entity, option);
             }
         }
     }

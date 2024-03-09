@@ -6,7 +6,7 @@ import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 
 public abstract class Animation implements INBTSerializable<CompoundTag> {
     private static final BiMap<String, Class<? extends Animation>> ANIMATIONS = HashBiMap.create();
@@ -14,7 +14,7 @@ public abstract class Animation implements INBTSerializable<CompoundTag> {
         ANIMATIONS.put(type, clazz);
     }
 
-    public abstract void play(EntityNPC entityNPC);
+    public abstract void play(NPCMob entityNPC);
 
     public static Animation create(String animation) throws IllegalAccessException, InstantiationException {
         return ANIMATIONS.get(animation).newInstance();
@@ -36,15 +36,15 @@ public abstract class Animation implements INBTSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(CompoundTag nbt) {}
 
-    public boolean renderLiving(EntityNPC npc, double x, double y, double z) {
+    public boolean renderLiving(NPCMob npc, double x, double y, double z) {
         return false;
     }
 
-    public boolean applyRotation(EntityNPC npc) {
+    public boolean applyRotation(NPCMob npc) {
         return false;
     }
 
-    public boolean render(EntityNPC npc, float pEntityYaw, float pPartialTicks, PoseStack pose, MultiBufferSource pBuffer, int pPackedLight) {
+    public boolean render(NPCMob npc, float pEntityYaw, float pPartialTicks, PoseStack pose, MultiBufferSource pBuffer, int pPackedLight) {
         return false;
     }
 }

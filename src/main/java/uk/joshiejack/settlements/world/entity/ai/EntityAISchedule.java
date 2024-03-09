@@ -2,15 +2,15 @@ package uk.joshiejack.settlements.world.entity.ai;
 
 import net.minecraft.world.entity.ai.goal.Goal;
 import uk.joshiejack.penguinlib.util.helper.TimeHelper;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 
 import java.util.EnumSet;
 
 public class EntityAISchedule extends Goal {
     private int cooldown = 0;
-    private final EntityNPC npc;
+    private final NPCMob npc;
 
-    public EntityAISchedule(EntityNPC npc) {
+    public EntityAISchedule(NPCMob npc) {
         this.npc = npc;
         this.setFlags(EnumSet.of(Flag.TARGET));
         //this.setMutexBits(1);

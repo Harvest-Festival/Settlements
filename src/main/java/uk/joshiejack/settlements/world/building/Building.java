@@ -2,27 +2,21 @@ package uk.joshiejack.settlements.world.building;
 
 import com.mojang.serialization.Codec;
 import com.mojang.serialization.codecs.RecordCodecBuilder;
-import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.network.FriendlyByteBuf;
+import net.minecraft.network.chat.Component;
+import net.minecraft.network.chat.ComponentSerialization;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import uk.joshiejack.penguinlib.util.registry.ReloadableRegistry;
+import uk.joshiejack.penguinlib.world.item.PenguinRegistryItem;
 import uk.joshiejack.settlements.Settlements;
 
-public class Building implements ReloadableRegistry.PenguinRegistry<Building> {
+public record Building(Template template, Component name) implements ReloadableRegistry.PenguinRegistry<Building>, PenguinRegistryItem.Nameable {
     public static final Codec<Building> CODEC = RecordCodecBuilder.create(instance -> instance.group(
-            Template.CODEC.fieldOf("template").forGetter(Building::getTemplate),
-            BuiltInRegistries.ITEM.byNameCodec().fieldOf("item").forGetter(b -> b.item)
+            Template.CODEC.fieldOf("template").forGetter(Building::template),
+            ComponentSerialization.CODEC.fieldOf("Name").forGetter(data -> data.name)
     ).apply(instance, Building::new));
 
-    private final Template template;
-    private final Item item;
-
-    public Building(Template template, Item item) {
-        this.template = template;
-        this.item = item;
-    }
 
     @Override
     public ResourceLocation id() {
@@ -30,18 +24,14 @@ public class Building implements ReloadableRegistry.PenguinRegistry<Building> {
     }
 
     @Override
-    public Building fromNetwork(FriendlyByteBuf friendlyByteBuf) {
-        return new Building(Template.EMPTY.fromNetwork(friendlyByteBuf), friendlyByteBuf.readById(BuiltInRegistries.ITEM));
+    public Building fromNetwork(FriendlyByteBuf buf) {
+        return new Building(Template.EMPTY.fromNetwork(buf), buf.readComponent());
     }
 
     @Override
-    public void toNetwork(FriendlyByteBuf friendlyByteBuf) {
-        template.toNetwork(friendlyByteBuf);
-        friendlyByteBuf.writeId(BuiltInRegistries.ITEM, item);
-    }
-
-    public Template getTemplate() {
-        return template;
+    public void toNetwork(FriendlyByteBuf buf) {
+        template.toNetwork(buf);
+        buf.writeComponent(name);
     }
 
     public static Building getBuildingFromItem(ItemStack item) {

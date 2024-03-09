@@ -4,25 +4,25 @@ import net.minecraft.world.InteractionHand;
 import net.minecraft.world.entity.player.Player;
 import net.neoforged.bus.api.ICancellableEvent;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.quest.Quest;
 
 public class NPCEvent extends PlayerEvent implements ICancellableEvent {
-    private final EntityNPC npcEntity;
+    private final NPCMob npcEntity;
 
-    public NPCEvent(EntityNPC npcEntity, Player player) {
+    public NPCEvent(NPCMob npcEntity, Player player) {
         super(player);
         this.npcEntity = npcEntity;
     }
 
-    public EntityNPC getNPCEntity() {
+    public NPCMob getNPCEntity() {
         return npcEntity;
     }
 
     public static class NPCRightClickedEvent extends NPCEvent {
         private final InteractionHand hand;
 
-        public NPCRightClickedEvent(EntityNPC npcEntity, Player player, InteractionHand hand) {
+        public NPCRightClickedEvent(NPCMob npcEntity, Player player, InteractionHand hand) {
             super(npcEntity, player);
             this.hand = hand;
         }
@@ -35,7 +35,7 @@ public class NPCEvent extends PlayerEvent implements ICancellableEvent {
     public static class NPCFinishedSpeakingEvent extends NPCEvent {
         private final Quest script;
 
-        public NPCFinishedSpeakingEvent(EntityNPC npcEntity, Player player, Quest script) {
+        public NPCFinishedSpeakingEvent(NPCMob npcEntity, Player player, Quest script) {
             super(npcEntity, player);
             this.script = script;
         }

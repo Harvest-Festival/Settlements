@@ -8,7 +8,7 @@ import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.InteractionResult;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.world.entity.EntityNPC;
+import uk.joshiejack.settlements.world.entity.NPCMob;
 
 import java.util.Objects;
 
@@ -62,7 +62,7 @@ public abstract class Action implements INBTSerializable<CompoundTag> {
     /** @return EnumActionResult.SUCCESS to go to the next queued item, "succeeded in finishing"
      *          EnumActionResult.FAIL to cancel the rest of the queue,  "there was an error"
      *          EnumActionResult.PASS to continue executing,            "pass to the next step of this action"  */
-    public abstract InteractionResult execute(EntityNPC npc);
+    public abstract InteractionResult execute(NPCMob npc);
 
     @Override
     public CompoundTag serializeNBT() {

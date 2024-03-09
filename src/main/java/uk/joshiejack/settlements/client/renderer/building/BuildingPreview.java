@@ -33,7 +33,7 @@ public class BuildingPreview {
             .<BuildingPlacement.PlacementKey, BuildingRenderer>removalListener(entry -> entry.getValue().close()).build(new CacheLoader<>() {
         @Override
         public @NotNull BuildingRenderer load(@NotNull BuildingPlacement.PlacementKey key) {
-            return new BuildingRenderer(new BuildingBlockGetter(key.building().getTemplate(), key.rotation()));
+            return new BuildingRenderer(new BuildingBlockGetter(key.building().template(), key.rotation()));
         }
     });
 
