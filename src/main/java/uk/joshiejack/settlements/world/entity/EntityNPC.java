@@ -97,7 +97,8 @@ public class EntityNPC extends AgeableMob implements IEntityWithComplexSpawn {
     }
 
     private void initNPCData() {
-        if (info == null || info.getNPCClass() == null) this.setRemoved(RemovalReason.DISCARDED);
+        if (info == null || info.getNPCClass() == null)
+            this.setRemoved(RemovalReason.DISCARDED);
         else {
             this.lifespan = info.getNPCClass().lifespan();
             float modifier = info.getNPCClass().height();
@@ -374,7 +375,7 @@ public class EntityNPC extends AgeableMob implements IEntityWithComplexSpawn {
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
         npc = NPC.getNPCFromRegistry(new ResourceLocation(nbt.getString("NPC")));
-        if (npc == NPC.NULL) this.setRemoved(RemovalReason.DISCARDED); //Kill off null npcs
+        //TODO? if (npc == NPC.NULL) this.setRemoved(RemovalReason.DISCARDED); //Kill off null npcs
         physicalAI.deserializeNBT(nbt.getList("PhysicalActions", 10));
         mentalAI.deserializeNBT(nbt.getList("MentalActions", 10));
         lootDisabled = nbt.getBoolean("LootDisabled");
@@ -402,7 +403,6 @@ public class EntityNPC extends AgeableMob implements IEntityWithComplexSpawn {
             buf.writeUtf(animation.getID());
         }
 
-        buf.writeBoolean(npc != NPC.NULL);
         PenguinNetwork.writeRegistry(npc, buf);
         buf.writeNbt(custom);
     }
@@ -410,8 +410,7 @@ public class EntityNPC extends AgeableMob implements IEntityWithComplexSpawn {
     @Override
     public void readSpawnData(FriendlyByteBuf buf) {
         if (buf.readBoolean()) setAnimation(buf.readUtf()); //Animation bitch
-        ResourceLocation name = buf.readBoolean() ? buf.readResourceLocation() : null;
-        npc = Settlements.Registries.NPCS.getOrDefault(name, NPC.NULL);
+        npc = PenguinNetwork.readRegistry(Settlements.Registries.NPCS, buf);
         custom = buf.readNbt();
         assert custom != null;
         info = custom.isEmpty() ? npc : DynamicNPC.fromTag(custom);
@@ -437,6 +436,7 @@ public class EntityNPC extends AgeableMob implements IEntityWithComplexSpawn {
         }
     }
 
+    @Nonnull
     public NPCInfo getInfo() {
         return info;
     }

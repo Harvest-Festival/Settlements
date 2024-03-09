@@ -75,7 +75,6 @@ public class QuestingEvents {
 
     @SubscribeEvent
     public static void onTriggerFired(ScriptingEvents.TriggerFired event) {
-        System.out.println("Trigger was fired: " + event.getMethod() + " with " + event.getObjects().length + " objects");
         //Only fire these when we have a player assigned
         Player player = event.getPlayer();
         if (player instanceof ServerPlayer) {
@@ -89,10 +88,8 @@ public class QuestingEvents {
     public static void runOnStorage(String function, Quest script, Player player, Object... args) {
         fireTrigger(function, player);
         QuestData data = QuestHelper.getData(player, script);
-        System.out.println("Looking for data? " + data + " for " + player.getName() + " and " + script.id() + " and " + function);
 
         if (data != null) {
-            System.out.println("Firing the function on storage instead of local?");
             Object[] args2 = new Object[args.length + 1];
             System.arraycopy(args, 0, args2, 1, args.length);
             args2[0] = player; //Set the first param to the player
@@ -105,7 +102,6 @@ public class QuestingEvents {
     private static void fireTrigger(String method, Player player) {
         //Get All quests for Player
         List<QuestTracker> trackers = QuestSavedData.get((ServerLevel) player.level()).getTrackers(player);
-        System.out.println("Found trackers: " + trackers.size());
         trackers.forEach((t) -> {
             //We have all the trackers, now we need to call the fire method
             t.fire(method, player);

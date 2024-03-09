@@ -35,6 +35,7 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
             .apply(inst, NPC::new));
 
     private static final ResourceLocation TEXTURE_DEFAULT = new ResourceLocation("textures/entity/steve.png");
+    private static final ResourceLocation NULL_ID = new ResourceLocation(Settlements.MODID, "null");
     public static final NPC NULL = new NPC(null, null, null, null, NPCClass.NULL, 0xFFFFFF, 0x000000).setOccupation(Strings.EMPTY).setNPCClass(NPCClass.NULL);
     private final Object2IntMap<String> data = new Object2IntOpenHashMap<>();
     private final Object2IntMap<String> giftCategoryOverrides = new Object2IntOpenHashMap<>();
@@ -94,8 +95,7 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     }
 
     public String getUnlocalizedKey() {
-        ResourceLocation key = id();
-        return key.getNamespace() + ".npc." + key.getPath();
+        return id().getNamespace() + ".npc." + id().getPath();
     }
 
     public int getData(String name) {
@@ -199,12 +199,12 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
             }
         }
 
-        return skin;
+        return skin == null ? TEXTURE_DEFAULT : skin;
     }
 
     @Override
     public ResourceLocation id() {
-        return Settlements.Registries.NPCS.getID(this);
+        return this == NULL ? NULL_ID : Settlements.Registries.NPCS.getID(this);
     }
 
     @Override

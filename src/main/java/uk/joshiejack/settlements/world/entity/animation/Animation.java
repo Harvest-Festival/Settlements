@@ -2,6 +2,8 @@ package uk.joshiejack.settlements.world.entity.animation;
 
 import com.google.common.collect.BiMap;
 import com.google.common.collect.HashBiMap;
+import com.mojang.blaze3d.vertex.PoseStack;
+import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.nbt.CompoundTag;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import uk.joshiejack.settlements.world.entity.EntityNPC;
@@ -39,6 +41,10 @@ public abstract class Animation implements INBTSerializable<CompoundTag> {
     }
 
     public boolean applyRotation(EntityNPC npc) {
+        return false;
+    }
+
+    public boolean render(EntityNPC npc, float pEntityYaw, float pPartialTicks, PoseStack pose, MultiBufferSource pBuffer, int pPackedLight) {
         return false;
     }
 }

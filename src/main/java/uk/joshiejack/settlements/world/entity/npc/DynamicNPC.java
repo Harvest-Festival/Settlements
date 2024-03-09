@@ -2,8 +2,10 @@ package uk.joshiejack.settlements.world.entity.npc;
 
 import com.google.common.collect.Lists;
 import com.google.common.collect.Maps;
+import com.mojang.authlib.GameProfile;
 import it.unimi.dsi.fastutil.objects.Object2IntMap;
 import it.unimi.dsi.fastutil.objects.Object2IntOpenHashMap;
+import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.core.registries.BuiltInRegistries;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -21,6 +23,7 @@ import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.scripting.Interpreter;
 import uk.joshiejack.penguinlib.scripting.ScriptFactory;
 import uk.joshiejack.settlements.Settlements;
+import uk.joshiejack.settlements.client.entity.SkinCache;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftCategory;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftQuality;
 
@@ -176,7 +179,10 @@ public class DynamicNPC implements NPCInfo {
 
     public static class Client {
         public static ResourceLocation getSkinFromUsernameOrUUID(@Nullable UUID uuid, @Nullable String playerSkin) {
-            return null; //TODO: Fix this
+            GameProfile profile = SkinCache.getOrResolveGameProfile(uuid);
+            PlayerInfo info = new PlayerInfo(profile, false);
+            return info.getSkin().texture();
+            //return null; //TODO: Fix this
 //            GameProfile profile = SkullBlockEntity.updateGameprofile(new GameProfile(uuid, playerSkin));
 //            Minecraft minecraft = Minecraft.getInstance();
 //            Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getOrLoad(profile);

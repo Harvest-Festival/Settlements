@@ -101,7 +101,6 @@ public class QuestTracker implements INBTSerializable<CompoundTag> {
         methods.clear();
         //Build a list of all quests that are not currently active, but that are able to be started i.e. completed < repeat amount
         for (Quest quest : Settlements.Registries.QUESTS.registry().values()) {
-            System.out.println("found quest: " + quest.id() + " with type " + quest.getSettings().getType() + " vs " + type);
             if (quest.getSettings().getType() != type) continue;
             if (completed.containsKey(quest.id())) {
                 if (quest.getSettings().getRepeat() == Repeat.NONE)
@@ -120,11 +119,6 @@ public class QuestTracker implements INBTSerializable<CompoundTag> {
             } else {
                 //We know the quest isn't currently active, and in theory it can be started as we are just ignoring the prereqs, and checking in the canStartMethod instead
                 //Therefore we want to call the canStart method/other methods where applicable so let's add those to the triggers
-                System.out.println("It was not an active quest so adding triggers");
-                for (String m : quest.getTriggers()) {
-                    System.out.println("Adding trigger " + m + " for " + quest.id());
-                }
-
                 quest.getTriggers().forEach((m) -> triggers.get(m).add(quest));
             }
         }
@@ -142,7 +136,6 @@ public class QuestTracker implements INBTSerializable<CompoundTag> {
     }
 
     public void fire(String method, Player player) {
-        System.out.println("Firing method " + method + " for " + player.getName().getString());
         HashMultimap.create(triggers).get(method).forEach(script -> script.fire(method, player, this));
     }
 
@@ -175,8 +168,6 @@ public class QuestTracker implements INBTSerializable<CompoundTag> {
                     if (completedDay.containsKey(id)) data.putInt("DayLastCompleted", completedDay.getInt(id));
                     questData.add(data);
                 });
-
-        System.out.println(questData.size() + " ... quest size");
 
         if (!questData.isEmpty()) tag.put("QuestData", questData);
         if (daily != null) {

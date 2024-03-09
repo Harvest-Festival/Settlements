@@ -80,7 +80,6 @@ public class QuestHelper {
         String namespace = resourcelocation.getNamespace();
         String path = Settlements.MODID + "/quests/" + resourcelocation.getPath();
         ResourceLocation location = new ResourceLocation(namespace, path + (path.contains(".js") ? Strings.EMPTY : ".js"));
-        System.out.println("Looking for " + location);
         try (Reader reader = manager.getResource(location).get().openAsReader()) {
             String javascript = IOUtils.toString(reader);
             return ScriptLoader.requireToJavascript(manager, javascript);

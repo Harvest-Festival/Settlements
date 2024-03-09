@@ -28,6 +28,7 @@ import uk.joshiejack.settlements.data.SettlementsBuildings;
 import uk.joshiejack.settlements.data.SettlementsQuests;
 import uk.joshiejack.settlements.world.building.Building;
 import uk.joshiejack.settlements.world.building.Template;
+import uk.joshiejack.settlements.world.entity.SettlementsEntities;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftQuality;
 import uk.joshiejack.settlements.world.quest.Quest;
@@ -44,6 +45,7 @@ public class Settlements {
 
     public Settlements(IEventBus eventBus) {
         Registries.init();
+        SettlementsEntities.ENTITIES.register(eventBus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SettlementsConfig.create());
     }
 

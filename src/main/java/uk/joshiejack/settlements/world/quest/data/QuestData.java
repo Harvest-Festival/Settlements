@@ -27,7 +27,6 @@ public class QuestData implements INBTSerializable<CompoundTag> {
     }
 
     public void callFunction(String function, Object... objects) {
-        System.out.println("Calling function: " + function + " with objects: " + objects + " on id: " + interpreter.scriptID);
         interpreter.callFunction(function, objects);
     }
 
