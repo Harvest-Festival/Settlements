@@ -16,6 +16,7 @@ import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.ModLoadingContext;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.fml.config.ModConfig;
+import net.neoforged.fml.event.lifecycle.FMLCommonSetupEvent;
 import net.neoforged.neoforge.common.ModConfigSpec;
 import net.neoforged.neoforge.data.event.GatherDataEvent;
 import net.neoforged.neoforge.registries.datamaps.DataMapType;
@@ -28,6 +29,18 @@ import uk.joshiejack.settlements.data.SettlementsQuests;
 import uk.joshiejack.settlements.world.building.Building;
 import uk.joshiejack.settlements.world.building.Template;
 import uk.joshiejack.settlements.world.entity.SettlementsEntities;
+import uk.joshiejack.settlements.world.entity.ai.action.Action;
+import uk.joshiejack.settlements.world.entity.ai.action.ErrorAction;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.*;
+import uk.joshiejack.settlements.world.entity.ai.action.item.GiftItemAction;
+import uk.joshiejack.settlements.world.entity.ai.action.item.TakeItemAction;
+import uk.joshiejack.settlements.world.entity.ai.action.item.TakeHeldItemAction;
+import uk.joshiejack.settlements.world.entity.ai.action.level.SpawnEntityAction;
+import uk.joshiejack.settlements.world.entity.ai.action.move.*;
+import uk.joshiejack.settlements.world.entity.ai.action.quest.CompleteQuestAction;
+import uk.joshiejack.settlements.world.entity.ai.action.status.AdjustNPCStatusAction;
+import uk.joshiejack.settlements.world.entity.ai.action.status.SetNPCStatusAction;
+import uk.joshiejack.settlements.world.entity.ai.action.status.SetTeamStatusAction;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftQuality;
 import uk.joshiejack.settlements.world.item.SettlementsCreativeTab;
@@ -50,6 +63,39 @@ public class Settlements {
         SettlementsItems.ITEMS.register(eventBus);
         SettlementsCreativeTab.CREATIVE_MODE_TABS.register(eventBus);
         ModLoadingContext.get().registerConfig(ModConfig.Type.SERVER, SettlementsConfig.create());
+    }
+
+    @SubscribeEvent
+    public static void setup(FMLCommonSetupEvent event) {
+        //Error
+        Action.register("error", ErrorAction.class);
+        //Chat
+        Action.register("ask", AskAction.class);
+        Action.register("greet", GreetAction.class);
+        Action.register("look", LookAction.class);
+        Action.register("next", NextAction.class);
+        Action.register("say", SayAction.class);
+        //Item
+        Action.register("gift_item", GiftItemAction.class);
+        Action.register("take_item", TakeItemAction.class);
+        Action.register("take_held_item", TakeHeldItemAction.class);
+        //Level
+        Action.register("spawn_entity", SpawnEntityAction.class);
+        //Move
+        Action.register("attack", AttackAction.class);
+        Action.register("move", MoveAction.class);
+        Action.register("sleep", SleepAction.class);
+        Action.register("teleport", TeleportAction.class);
+        Action.register("wait", WaitAction.class);
+        Action.register("wakeup", WakeupAction.class);
+        //Quest
+        Action.register("complete_quest", CompleteQuestAction.class);
+        //Status
+        Action.register("adjust_npc_status", AdjustNPCStatusAction.class);
+        Action.register("set_npc_status", SetNPCStatusAction.class);
+        Action.register("set_team_status", SetTeamStatusAction.class);
+        //Tasks
+
     }
 
     @SubscribeEvent

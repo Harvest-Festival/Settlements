@@ -1,4 +1,4 @@
-package uk.joshiejack.settlements.world.entity.ai.action.world;
+package uk.joshiejack.settlements.world.entity.ai.action.level;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.BuiltInRegistries;
@@ -6,22 +6,18 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
-import uk.joshiejack.penguinlib.scripting.wrapper.PositionJS;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //TODO: @PenguinLoader("spawn_entity")
-public class ActionSpawnEntity extends ActionMental {
+public class SpawnEntityAction extends ActionMental {
     private ResourceLocation entityName;
     private BlockPos pos;
 
-    @Override
-    public ActionSpawnEntity withData(Object... params) {
-        entityName = new ResourceLocation((String) params[0]);
-        if (params.length == 2) {
-            pos = ((PositionJS)params[0]).get();
-        } else pos = new BlockPos((int)params[1], (int)params[2], (int)params[3]);
-        return this;
+    public SpawnEntityAction() {}
+    public SpawnEntityAction(ResourceLocation entityName, BlockPos pos) {
+        this.entityName = entityName;
+        this.pos = pos;
     }
 
     @Override

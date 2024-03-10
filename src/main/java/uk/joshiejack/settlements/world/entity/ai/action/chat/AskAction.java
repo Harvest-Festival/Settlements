@@ -20,7 +20,7 @@ import java.util.List;
 import java.util.Objects;
 
 //TODO@PenguinLoader("ask")
-public class ActionAsk extends ActionMental implements ActionChat {
+public class AskAction extends ActionMental implements ActionChat {
     public String question;
     public String[] answers;
     public String[] formatting;
@@ -28,9 +28,9 @@ public class ActionAsk extends ActionMental implements ActionChat {
     private boolean asked;
     private boolean answered;
 
-    @Override
-    public ActionAsk withData(Object... params) {
-        this.question = (String) params[0];
+    public AskAction() {}
+    public AskAction(String... params) {
+        this.question = params[0];
         //Stuff
         List<String> answers = Lists.newArrayList();
         List<String> functions = Lists.newArrayList();
@@ -52,7 +52,22 @@ public class ActionAsk extends ActionMental implements ActionChat {
         this.answers = answers.toArray(new String[0]);
         this.functions = functions.toArray(new String[0]);
         this.formatting = formatting.toArray(new String[0]);
-        return this;
+    }
+
+    public AskAction(CompoundTag nbt) {
+        registryName = new ResourceLocation(nbt.getString("RegistryName"));
+        isQuest = nbt.getBoolean("IsQuest");
+        question = nbt.getString("Question");
+        int length = nbt.getByte("AnswersLength");
+        answers = new String[length];
+        for (int i = 0; i < length; i++) {
+            answers[i] = nbt.getString("Answer" + i);
+        }
+
+        formatting = new String[nbt.getByte("FormattingLength")];
+        for (int i = 0; i < formatting.length; i++) {
+            formatting[i] = nbt.getString("Formatting" + i);
+        }
     }
 
     @Override

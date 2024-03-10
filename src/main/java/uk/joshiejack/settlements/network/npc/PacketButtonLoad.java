@@ -32,8 +32,7 @@ public class PacketButtonLoad<A extends Action> implements PenguinPacket {
 
     @SuppressWarnings("unchecked, ConstantConditions")
     public PacketButtonLoad(FriendlyByteBuf buf) {
-        action = (A) Action.createOfType(buf.readUtf());
-        action.deserializeNBT(buf.readNbt());
+        action = (A) Action.createOfType(buf.readUtf(), buf.readNbt());
         npcID = buf.readInt();
         list = Lists.newArrayList();
         int count = buf.readByte();

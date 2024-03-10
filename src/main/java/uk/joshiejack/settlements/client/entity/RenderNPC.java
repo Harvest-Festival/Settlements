@@ -76,19 +76,19 @@ public class RenderNPC extends HumanoidMobRenderer<NPCMob, PlayerModel<NPCMob>> 
 
     @Override
     public @NotNull ResourceLocation getTextureLocation(@Nonnull NPCMob npc) {
-        return textureExists(npc.getInfo().getSkin()) ? npc.getInfo().getSkin() : NPC.MISSING_TEXTURE;
+        return npc.getNPC().getSkin() != null && textureExists(npc.getNPC().getSkin()) ? npc.getNPC().getSkin() : NPC.MISSING_TEXTURE;
     }
 
     @Override
     protected void scale(NPCMob npc, PoseStack pose, float pPartialTicks) {
-        float f1 = npc.getInfo().getNPCClass().height();
+        float f1 = npc.getNPC().getNPCClass().height();
         float f3 = 0.9375F;
         pose.scale(f3 * f1, 1.0F / f3 * f1, f3 * f1);
     }
 
     @Override
     public void render(NPCMob npc, float pEntityYaw, float pPartialTicks, PoseStack pose, MultiBufferSource pBuffer, int pPackedLight) {
-        model = npc.getInfo().getNPCClass().smallArms() ? alex : model;
+        model = npc.getNPC().getNPCClass().smallArms() ? alex : model;
         setModelProperties(npc);
         if (npc.getAnimation() == null || (npc.isAlive() && !npc.getAnimation().render(npc, pEntityYaw, pPartialTicks, pose, pBuffer, pPackedLight))) {
             super.render(npc, pEntityYaw, pPartialTicks, pose, pBuffer, pPackedLight);
@@ -201,8 +201,8 @@ public class RenderNPC extends HumanoidMobRenderer<NPCMob, PlayerModel<NPCMob>> 
 
         @Override
         public void render(@NotNull PoseStack stack, @NotNull MultiBufferSource buffer, int num1, @NotNull NPCMob npc, float f1, float f2, float f3, float f4, float f5, float f6) {
-            innerModel = npc.getInfo().getNPCClass().smallArms() ? alexInner : innerModel;
-            outerModel = npc.getInfo().getNPCClass().smallArms() ? alexOuter : outerModel;
+            innerModel = npc.getNPC().getNPCClass().smallArms() ? alexInner : innerModel;
+            outerModel = npc.getNPC().getNPCClass().smallArms() ? alexOuter : outerModel;
             super.render(stack, buffer, num1, npc, f1, f2, f3, f4, f5, f6);
         }
     }

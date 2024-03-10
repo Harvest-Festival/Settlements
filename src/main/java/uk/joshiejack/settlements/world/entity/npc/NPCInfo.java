@@ -5,7 +5,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.ItemStack;
 
+import javax.annotation.Nullable;
+
 public interface NPCInfo extends DisplayData, Worker {
+    @Nullable
     ResourceLocation getSkin();
     int getOutsideColor();
     int getInsideColor();
@@ -15,4 +18,8 @@ public interface NPCInfo extends DisplayData, Worker {
     int getData(String name);
     void callScript(String function, Object... params);
 
+    @Nullable
+    default ResourceLocation getLootTable() {
+        return null;
+    }
 }

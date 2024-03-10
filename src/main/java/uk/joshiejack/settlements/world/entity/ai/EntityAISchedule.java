@@ -28,7 +28,7 @@ public class EntityAISchedule extends Goal {
     @Override
     public void tick() {
         cooldown = 25;
-        npc.getInfo().callScript("onNPCScheduleUpdate", npc, TimeHelper.getTimeOfDay(npc.level().getDayTime()));
+        npc.getNPC().callScript("onNPCScheduleUpdate", npc, TimeHelper.getTimeOfDay(npc.level().getDayTime()));
     }
 
     @Override

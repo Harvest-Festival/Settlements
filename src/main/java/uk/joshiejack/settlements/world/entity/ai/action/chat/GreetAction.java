@@ -8,8 +8,7 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-//TODO: Register @PenguinLoader("greet")
-public class ActionGreet extends ActionMental implements ActionChat {
+public class GreetAction extends ActionMental implements ActionChat {
     private boolean read;
     private boolean displayed;
 

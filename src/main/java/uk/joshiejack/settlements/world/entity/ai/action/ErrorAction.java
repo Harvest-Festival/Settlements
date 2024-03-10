@@ -4,8 +4,8 @@ import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 
 //TODO@PenguinLoader("error")
-public class ActionError extends ActionMental {
-    public static final Action INSTANCE = new ActionError();
+public class ErrorAction extends ActionMental {
+    public static final Action INSTANCE = new ErrorAction();
 
     @Override
     public InteractionResult execute(NPCMob npc) {

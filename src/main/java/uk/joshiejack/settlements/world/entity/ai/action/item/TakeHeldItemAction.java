@@ -7,15 +7,14 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
 //TODO@PenguinLoader("take_held")
-public class ActionTakeHeldItem extends ActionMental {
+public class TakeHeldItemAction extends ActionMental {
     private InteractionHand hand;
     private int amount;
 
-    @Override
-    public ActionTakeHeldItem withData(Object... params) {
-        this.hand = (InteractionHand) params[0];
-        this.amount = (int) params[1];
-        return this;
+    public TakeHeldItemAction() {}
+    public TakeHeldItemAction(InteractionHand hand, int amount) {
+        this.hand = hand;
+        this.amount = amount;
     }
 
     @Override

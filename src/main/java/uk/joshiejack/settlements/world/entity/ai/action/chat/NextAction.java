@@ -8,8 +8,7 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-//TODO@PenguinLoader("next")
-public class ActionNext extends ActionMental implements ActionChat {
+public class NextAction extends ActionMental implements ActionChat {
     @Override
     public InteractionResult execute(NPCMob npc) {
         NPCEvent.NPCRightClickedEvent event = new NPCEvent.NPCRightClickedEvent(npc, player, player.getUsedItemHand());

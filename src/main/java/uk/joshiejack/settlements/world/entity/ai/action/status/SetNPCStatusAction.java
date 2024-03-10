@@ -9,32 +9,22 @@ import uk.joshiejack.settlements.scripting.wrapper.NPCStatusJS;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-//@PenguinLoader("set_npc_status")
-public class ActionSetNPCStatus extends ActionMental {
+public class SetNPCStatusAction extends ActionMental {
     private String npcRegistryName = Strings.EMPTY;
     private String status;
     private int value;
 
-    @Override
-    public ActionSetNPCStatus withData(Object... params) {
-        String var1 = (String) params[0];
-        int i = 0;
-        // If the first var is an npc we will use that npc
-        // Otherwise we just take the current NPC instead
-        if (var1.contains(":")) {
-            this.npcRegistryName = var1;
-            i++;
-        }
-        
-        this.status = (String) params[i];
-        this.value = Integer.parseInt(String.valueOf(params[i + 1]));
-        return this;
+    public SetNPCStatusAction() {}
+    public SetNPCStatusAction(String npcRegistryName, String status, int value) {
+        this.npcRegistryName = npcRegistryName.contains(":") ? npcRegistryName : Strings.EMPTY;
+        this.status = status;
+        this.value = value;
     }
 
     @Override
     public InteractionResult execute(NPCMob npc) {
         if (player != null) {
-            NPCStatusJS wrapper = WrapperRegistry.wrap(npcRegistryName == null ? npc.getBaseNPC() : new ResourceLocation(npcRegistryName));
+            NPCStatusJS wrapper = WrapperRegistry.wrap(npcRegistryName == null ? npc.getNPC() : new ResourceLocation(npcRegistryName));
             wrapper.set(WrapperRegistry.wrap(player), status, value);
         }
 

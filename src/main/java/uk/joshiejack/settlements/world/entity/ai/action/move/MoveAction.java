@@ -3,20 +3,17 @@ package uk.joshiejack.settlements.world.entity.ai.action.move;
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
-import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
-//TODO @PenguinLoader("move")
-public class ActionMove extends ActionPhysical {
+public class MoveAction extends ActionPhysical {
     private BlockPos target;
     private double speed;
 
-    @Override
-    public ActionMove withData(Object... params) {
-        this.target = WrapperRegistry.unwrap(params[0]);
-        this.speed = (double) params[1];
-        return this;
+    public MoveAction() {}
+    public MoveAction(BlockPos target, double speed) {
+        this.target = target;
+        this.speed = speed;
     }
 
     @Override

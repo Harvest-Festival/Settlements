@@ -1,7 +1,6 @@
 package uk.joshiejack.settlements.world.item;
 
 import com.google.common.collect.Lists;
-import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionHand;
 import net.minecraft.world.InteractionResult;
@@ -12,7 +11,6 @@ import net.minecraft.world.level.Level;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.SettlementsEntities;
 import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
-import uk.joshiejack.settlements.world.entity.npc.NPC;
 
 import javax.annotation.Nonnull;
 import java.util.List;
@@ -35,8 +33,7 @@ public class RandomNPCSpawnerItem extends Item {
             //Let's create a custom npc to show up in the book?
             ResourceLocation uniqueID = new ResourceLocation("custom", UUID.randomUUID().toString());
             DynamicNPC.Builder builder = new DynamicNPC.Builder(level.getRandom(), uniqueID);
-            CompoundTag data = builder.build();
-            NPCMob mob = new NPCMob(SettlementsEntities.NPC.get(), level, NPC.NULL, data);
+            NPCMob mob = new NPCMob(SettlementsEntities.NPC.get(), level, builder.build());
             mob.setPos(context.getClickedPos().getX() + 0.5D, context.getClickedPos().getY() + 1, context.getClickedPos().getZ() + 0.5D);
             level.addFreshEntity(mob);
 //            town.getCensus().createCustomNPCFromData(world, uniqueID, NPC.CUSTOM_NPC, data);

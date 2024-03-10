@@ -4,35 +4,30 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.player.Player;
-import org.apache.logging.log4j.util.Strings;
 import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.settlements.network.npc.PacketSay;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-//TODO: @PenguinLoader("say")
-public class ActionSay extends ActionMental implements ActionChat {
+public class SayAction extends ActionMental implements ActionChat {
     public String text;
     public String[] formatting;
     private boolean displayed;
     private boolean read;
 
-    @Override
-    public ActionSay withData(Object... params) {
-        if (params.length == 0) {
-             this.text = "text";
-             this.formatting = new String[0];
-        } else {
-            this.text = (String) params[0];
-            this.formatting = new String[params.length - 1];
-            for (int i = 1; i < params.length; i++) {
-                this.formatting[i - 1] = String.valueOf(params[i]);
-            }
-        }
+    public SayAction() {}
+    public SayAction(String text) {
+        this.text = text;
+        this.formatting = new String[0];
+    }
 
-        if (this.text == null) this.text = Strings.EMPTY; //No null
-        return this;
+    public SayAction(String... params) {
+        this.text = params[0];
+        this.formatting = new String[params.length - 1];
+        for (int i = 1; i < params.length; i++) {
+            this.formatting[i - 1] = String.valueOf(params[i]);
+        }
     }
 
     @Override

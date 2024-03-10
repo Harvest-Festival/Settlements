@@ -11,7 +11,7 @@ import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
 import uk.joshiejack.penguinlib.util.registry.Packet;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
-import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionAsk;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.AskAction;
 
 @Packet(PacketFlow.SERVERBOUND)
 public record PacketAnswer(int npcID, ResourceLocation registryName, boolean isQuest, int option) implements PenguinPacket {
@@ -40,8 +40,8 @@ public record PacketAnswer(int npcID, ResourceLocation registryName, boolean isQ
         if (entity instanceof NPCMob) {
             Action action = ((NPCMob) entity).getMentalAI().getCurrent();
             (((NPCMob)entity)).removeTalking(player);
-            if (action instanceof ActionAsk) {
-                ((ActionAsk)action).onGuiClosed(player, (NPCMob) entity, option);
+            if (action instanceof AskAction) {
+                ((AskAction)action).onGuiClosed(player, (NPCMob) entity, option);
             }
         }
     }

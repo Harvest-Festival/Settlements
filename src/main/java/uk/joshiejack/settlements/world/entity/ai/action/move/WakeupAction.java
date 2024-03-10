@@ -5,7 +5,7 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 //TODO: @PenguinLoader("wakeup")
-public class ActionWakeup extends ActionPhysical {
+public class WakeupAction extends ActionPhysical {
     @Override
     public InteractionResult execute(NPCMob npc) {
         npc.setAnimation("wakeup");

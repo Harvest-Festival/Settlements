@@ -8,10 +8,10 @@ import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.util.registry.Packet;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionSay;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.SayAction;
 
 @Packet(PacketFlow.CLIENTBOUND)
-public class PacketSay extends PacketButtonLoad<ActionSay> {
+public class PacketSay extends PacketButtonLoad<SayAction> {
     public static final ResourceLocation ID = PenguinLib.prefix("npc_say");
 
     @Override
@@ -22,7 +22,7 @@ public class PacketSay extends PacketButtonLoad<ActionSay> {
     public PacketSay(FriendlyByteBuf buf) {
         super(buf);
     }
-    public PacketSay(Player player, NPCMob npc, ActionSay action) {
+    public PacketSay(Player player, NPCMob npc, SayAction action) {
         super(player, npc, action);
     }
 

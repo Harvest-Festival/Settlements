@@ -6,14 +6,13 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 //@PenguinLoader("wait")
-public class ActionWait extends ActionPhysical {
+public class WaitAction extends ActionPhysical {
     private int ticks;
     private int targetTicks;
 
-    @Override
-    public ActionWait withData(Object... data) {
-        this.targetTicks = (Integer) data[0] * 20;
-        return this;
+    public WaitAction() {}
+    public WaitAction(int targetTicks) {
+        this.targetTicks = targetTicks;
     }
 
     @Override

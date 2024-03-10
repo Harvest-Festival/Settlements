@@ -12,20 +12,15 @@ public abstract class AbstractActionRegistry<O extends ReloadableRegistry.Pengui
     protected ResourceLocation resource;
     protected final ReloadableRegistry<O> registry;
 
+
     public AbstractActionRegistry(ReloadableRegistry<O> registry) {
         this.registry = registry;
     }
 
     @Override
-    public AbstractActionRegistry<?> withData(Object... params) {
-        this.resource = new ResourceLocation((String)params[0]);
-        return this;
-    }
-
-    @Override
     public InteractionResult execute(NPCMob npc) {
         if (player != null) {
-            O p = registry.get(resource);
+            O p = registry.get(getResource());
             if (p != null) {
                 performAction(npc.level(), p);
             }
@@ -34,12 +29,16 @@ public abstract class AbstractActionRegistry<O extends ReloadableRegistry.Pengui
         return InteractionResult.SUCCESS;
     }
 
+    public ResourceLocation getResource() {
+        return registryName;
+    }
+
     public abstract void performAction(Level world, O object);
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        tag.putString("Resource", resource.toString());
+        tag.putString("Resource", getResource().toString());
         return tag;
     }
 

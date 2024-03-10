@@ -17,23 +17,26 @@ import net.minecraft.util.RandomSource;
 import net.minecraft.world.item.Item;
 import net.minecraft.world.item.ItemStack;
 import net.minecraft.world.item.Items;
+import net.minecraft.world.level.block.entity.SkullBlockEntity;
+import org.apache.commons.lang3.mutable.Mutable;
+import org.apache.commons.lang3.mutable.MutableObject;
 import org.apache.commons.lang3.tuple.Pair;
-import org.apache.logging.log4j.util.Strings;
 import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.scripting.Interpreter;
 import uk.joshiejack.penguinlib.scripting.ScriptFactory;
 import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.client.entity.SkinCache;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftCategory;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftQuality;
 
 import javax.annotation.Nullable;
 import java.awt.*;
+import java.util.Collections;
+import java.util.HashSet;
 import java.util.List;
-import java.util.*;
+import java.util.Map;
 
 public class DynamicNPC implements NPCInfo {
-    public static final List<String> NAMES = Lists.newArrayList();
+    public static final List<String> NAMES = List.of("joshiejack");
     private final Object2IntMap<String> giftCategoryOverrides = new Object2IntOpenHashMap<>();
     private final Object2IntMap<Item> giftItemOverrides = new Object2IntOpenHashMap<>();
     private final Map<String, String> responses = Maps.newHashMap();
@@ -41,36 +44,115 @@ public class DynamicNPC implements NPCInfo {
     private final List<String> greetings = Lists.newArrayList();
     private final ResourceLocation uniqueID;
     private final NPCClass npcClass;
-    private final String name, occupation, playerSkin, resourceSkin;
+    private final String name, occupation, skinName;
+    private final DynamicSkin dynamicSkin;
     private final int insideColor, outsideColor;
     private final ItemStack icon;
     private final ResourceLocation script;
     private Interpreter<?> it;
     private ResourceLocation skin;
+    @Nullable
+    private GameProfile owner;
 
     private DynamicNPC(ResourceLocation uniqueID, NPCClass npcClass, String name, String occupation, ResourceLocation schedulerScript,
-                       @Nullable String playerSkin, @Nullable String resourceSkin, int insideColor, int outsideColor) {
+                       String playerSkin, int insideColor, int outsideColor) {
         this.uniqueID = uniqueID;
         this.npcClass = npcClass;
         this.name = name;
         this.occupation = occupation;
         this.script = schedulerScript;
-        this.playerSkin = playerSkin;
-        this.resourceSkin = resourceSkin;
+        this.skinName = playerSkin;
+        if (!skinName.contains(":"))
+            dynamicSkin = new DynamicSkin(new MutableObject<>(null));
+        else dynamicSkin = null;
         this.insideColor = insideColor;
         this.outsideColor = outsideColor;
         this.icon = new ItemStack(Items.ACACIA_BOAT); //TODO :new ItemStack(AdventureItems.NPC_SPAWNER);
         CompoundTag tag = new CompoundTag();
-        if (playerSkin != null) {
-            tag.putString("PlayerSkin", playerSkin);
-        } else if (resourceSkin != null) {
-            tag.putString("ResourceSkin", resourceSkin);
-        }
-
+        tag.putString("Skin", skinName);
         this.icon.setTag(tag);
     }
 
-    public static NPCInfo fromTag(CompoundTag custom) {
+    public CompoundTag toTag() {
+        CompoundTag tag = new CompoundTag();
+        tag.putString("UniqueID", uniqueID.toString());
+        CompoundTag npcClass = getClassTag();
+        tag.put("Class", npcClass);
+        tag.putString("Name", name);
+        tag.putString("Occupation", occupation);
+        tag.putString("Skin", skinName);
+        tag.putInt("InsideColor", insideColor);
+        tag.putInt("OutsideColor", outsideColor);
+        //Gifts
+        {
+            CompoundTag gifts = new CompoundTag();
+            {
+                ListTag iOverrideList = new ListTag();
+                giftItemOverrides.forEach((key, value) -> {
+                    CompoundTag override = new CompoundTag();
+                    override.putString("Item", BuiltInRegistries.ITEM.getKey(key).toString());
+                    override.putInt("Quality", value);
+                    iOverrideList.add(override);
+                });
+                gifts.put("ItemOverrides", iOverrideList);
+            }
+            {
+                ListTag cOverrideList = new ListTag();
+                giftCategoryOverrides.forEach((key, value) -> {
+                    CompoundTag override = new CompoundTag();
+                    override.putString("Category", key);
+                    override.putInt("Quality", value);
+                    cOverrideList.add(override);
+                });
+
+                gifts.put("CategoryOverrides", cOverrideList);
+            }
+            tag.put("Gifts", gifts);
+        }
+
+        //Greetings
+        {
+            ListTag greetings = new ListTag();
+            this.greetings.forEach(g -> greetings.add(StringTag.valueOf(g)));
+            tag.put("Greetings", greetings);
+        }
+
+        //Thanks
+        {
+            CompoundTag speech = new CompoundTag();
+            responses.forEach((key, value) -> speech.putString("gift." + key, value));
+            tag.put("Speech", speech);
+        }
+
+        //Data
+        {
+            CompoundTag data = new CompoundTag();
+            this.data.forEach((k, v) -> data.putInt(k, this.data.get(k)));
+
+            tag.put("Data", data);
+        }
+
+        return tag;
+    }
+
+    @NotNull
+    private CompoundTag getClassTag() {
+        CompoundTag npcClass = new CompoundTag();
+        npcClass.putString("Age", this.npcClass.age().name());
+        npcClass.putBoolean("SmallArms", this.npcClass.smallArms());
+        npcClass.putFloat("Height", this.npcClass.height());
+        npcClass.putFloat("Offset", this.npcClass.offset());
+        npcClass.putBoolean("Invulnerable", this.npcClass.invulnerable());
+        npcClass.putBoolean("Immovable", this.npcClass.immovable());
+        npcClass.putBoolean("Underwater", this.npcClass.underwater());
+        npcClass.putBoolean("Floats", this.npcClass.floats());
+        npcClass.putBoolean("Invitable", this.npcClass.invitable());
+        npcClass.putInt("Lifespan", this.npcClass.lifespan());
+        npcClass.putBoolean("HideHearts", this.npcClass.hideHearts());
+        return npcClass;
+    }
+
+    public static DynamicNPC fromTag(CompoundTag custom) {
         CompoundTag npcClass = custom.getCompound("Class");
         DynamicNPC info = new DynamicNPC(
                 new ResourceLocation(custom.getString("UniqueID")),
@@ -89,8 +171,7 @@ public class DynamicNPC implements NPCInfo {
                 custom.getString("Name"),
                 custom.getString("Occupation"),
                 custom.contains("Script") ? new ResourceLocation(custom.getString("Script")) : null,
-                custom.contains("PlayerSkin") ? custom.getString("PlayerSkin") : null,
-                custom.contains("ResourceSkin") ? custom.getString("ResourceSkin") : null,
+                custom.contains("Skin") ? custom.getString("Skin") : NPC.MISSING_TEXTURE.toString(),
                 custom.getInt("InsideColor"),
                 custom.getInt("OutsideColor")
         );
@@ -124,7 +205,7 @@ public class DynamicNPC implements NPCInfo {
         //Deserialize responses
         if (custom.contains("Speech")) {
             CompoundTag tag = custom.getCompound("Speech");
-            for (String s: tag.getAllKeys()) {
+            for (String s : tag.getAllKeys()) {
                 info.responses.put(s, tag.getString(s));
             }
         }
@@ -132,7 +213,7 @@ public class DynamicNPC implements NPCInfo {
         //Deserialize data
         if (custom.contains("Data")) {
             CompoundTag tag = custom.getCompound("Data");
-            for (String s: tag.getAllKeys()) {
+            for (String s : tag.getAllKeys()) {
                 info.data.put(s, tag.getInt(s));
             }
         }
@@ -170,25 +251,23 @@ public class DynamicNPC implements NPCInfo {
     @Override
     public ResourceLocation getSkin() {
         if (skin != null) return skin;
-        if (playerSkin != null) {
-            skin = Client.getSkinFromUsernameOrUUID(null, playerSkin);
-        } else if (resourceSkin != null) skin = new ResourceLocation(resourceSkin);
+        if (dynamicSkin != null) {
+            skin = dynamicSkin.resolve(skinName);
+        } else skin = new ResourceLocation(skinName);
 
         return skin;
     }
 
-    public static class Client {
-        public static ResourceLocation getSkinFromUsernameOrUUID(@Nullable UUID uuid, @Nullable String playerSkin) {
-            GameProfile profile = SkinCache.getOrResolveGameProfile(uuid);
-            PlayerInfo info = new PlayerInfo(profile, false);
-            return info.getSkin().texture();
-            //return null; //TODO: Fix this
-//            GameProfile profile = SkullBlockEntity.updateGameprofile(new GameProfile(uuid, playerSkin));
-//            Minecraft minecraft = Minecraft.getInstance();
-//            Map<MinecraftProfileTexture.Type, MinecraftProfileTexture> map = minecraft.getSkinManager().getOrLoad(profile);
-//            if (map.containsKey(MinecraftProfileTexture.Type.SKIN)) {
-//                return minecraft.getSkinManager().loadSkin(map.get(MinecraftProfileTexture.Type.SKIN), MinecraftProfileTexture.Type.SKIN);
-//            } else return DefaultPlayerSkin.get(Player.getUUID(profile));
+    public record DynamicSkin(Mutable<ResourceLocation> resolvedSkin)  {
+        @Nullable
+        public ResourceLocation resolve(String playerSkin) {
+            SkullBlockEntity.fetchGameProfile(playerSkin).thenAcceptAsync(profile -> {
+                if (profile.isPresent()) {
+                    resolvedSkin.setValue(new PlayerInfo(profile.get(), false).getSkin().texture());
+                } else resolvedSkin.setValue(null);
+            });
+
+            return resolvedSkin.getValue();
         }
     }
 
@@ -248,8 +327,7 @@ public class DynamicNPC implements NPCInfo {
         private NPCClass npcClass = NPCClass.NULL;
         private String name = "CustomNPC";
         private String occupation = "villager";
-        private String playerSkin = "uk/joshiejack";
-        private String resourceSkin = Strings.EMPTY;
+        private String playerSkin = "joshiejack";
         private int insideColor = 0xFFFFFFFF;
         private int outsideColor = 0xFF000000;
 
@@ -264,26 +342,33 @@ public class DynamicNPC implements NPCInfo {
                 //TODO: Add a config for excluded classes
                 List<NPCClass> keys = Settlements.Registries.NPCS.stream().map(NPC::getNPCClass)
                         .filter(aClass -> !aClass.floats()).distinct().toList();
-                setClass(keys.get(rand.nextInt(keys.size())));
+                if (!keys.isEmpty())
+                    setClass(keys.get(rand.nextInt(keys.size())));
+                else
+                    setClass(NPCClass.ADULT);
             }
 
             //Let's get a random number of items
-            int itemOverrides = 5 + rand.nextInt(10);
-            for (int i = 0; i < itemOverrides; i++) {
-                List<GiftQuality> keys = Settlements.Registries.GIFT_QUALITIES.stream().toList();
-                List<Item> items = new java.util.ArrayList<>(BuiltInRegistries.ITEM.stream().toList());
-                Collections.shuffle(items);
-                addItemOverride(items.get(0), keys.get(0).value());
+            if (!Settlements.Registries.GIFT_QUALITIES.registry().isEmpty()) {
+                int itemOverrides = 5 + rand.nextInt(10);
+                for (int i = 0; i < itemOverrides; i++) {
+                    List<GiftQuality> keys = Settlements.Registries.GIFT_QUALITIES.stream().toList();
+                    List<Item> items = new java.util.ArrayList<>(BuiltInRegistries.ITEM.stream().toList());
+                    Collections.shuffle(items);
+                    addItemOverride(items.get(0), keys.get(0).value());
+                }
             }
 
             //Categories
-            int category = 3 + rand.nextInt(5);
-            for (int i = 0; i < category; i++) {
-                List<String> keys = Lists.newArrayList(GiftCategory.REGISTRY.keySet());
-                List<Integer> values = Lists.newArrayList(new HashSet<>(GiftCategory.REGISTRY.values()));
-                Collections.shuffle(keys);
-                Collections.shuffle(values);
-                addCategoryOverride(keys.get(0), values.get(0));
+            if (!GiftCategory.REGISTRY.isEmpty()) {
+                int category = 3 + rand.nextInt(5);
+                for (int i = 0; i < category; i++) {
+                    List<String> keys = Lists.newArrayList(GiftCategory.REGISTRY.keySet());
+                    List<Integer> values = Lists.newArrayList(new HashSet<>(GiftCategory.REGISTRY.values()));
+                    Collections.shuffle(keys);
+                    Collections.shuffle(values);
+                    addCategoryOverride(keys.get(0), values.get(0));
+                }
             }
 
             //Random Gift thanks?
@@ -349,11 +434,6 @@ public class DynamicNPC implements NPCInfo {
             this.playerSkin = playerSkin;
         }
 
-        public Builder setResourceSkin(String resourceSkin) {
-            this.resourceSkin = resourceSkin;
-            return this;
-        }
-
         public Builder setInsideColor(int insideColor) {
             this.insideColor = insideColor;
             return this;
@@ -363,87 +443,14 @@ public class DynamicNPC implements NPCInfo {
             this.outsideColor = outsideColor;
         }
 
-        public CompoundTag build() {
-            CompoundTag tag = new CompoundTag();
-            tag.putString("UniqueID", uniqueID.toString());
-            CompoundTag npcClass = getCompoundTag();
-            tag.put("Class", npcClass);
-            tag.putString("Name", name);
-            tag.putString("Occupation", occupation);
-            tag.putString(!resourceSkin.isEmpty() ? "ResourceSkin" : "PlayerSkin", !resourceSkin.isEmpty() ? resourceSkin : playerSkin);
-            tag.putInt("InsideColor", insideColor);
-            tag.putInt("OutsideColor", outsideColor);
-            //Gifts
-            {
-                CompoundTag gifts = new CompoundTag();
-                {
-                    ListTag iOverrideList = new ListTag();
-                    itemOverrides.forEach(pair -> {
-                        CompoundTag override = new CompoundTag();
-                        override.putString("Item", BuiltInRegistries.ITEM.getKey(pair.getLeft()).toString());
-                        override.putInt("Quality", pair.getRight());
-                        iOverrideList.add(override);
-                    });
-                    gifts.put("ItemOverrides", iOverrideList);
-                }
-                {
-                    ListTag cOverrideList = new ListTag();
-                    categoryOverrides.forEach((key, value) -> {
-                        CompoundTag override = new CompoundTag();
-                        override.putString("Category", key);
-                        override.putInt("Quality", value);
-                        cOverrideList.add(override);
-                    });
-
-                    gifts.put("CategoryOverrides", cOverrideList);
-                }
-                tag.put("Gifts", gifts);
-            }
-
-            //Greetings
-            {
-                ListTag greetings = new ListTag();
-                this.greetings.forEach(g -> greetings.add(StringTag.valueOf(g)));
-                tag.put("Greetings", greetings);
-            }
-
-            //Thanks
-            {
-                CompoundTag speech = new CompoundTag();
-                giftResponses.forEach((key, value) -> speech.putString("gift." + key, value));
-                tag.put("Speech", speech);
-            }
-
-            //Data
-            {
-                CompoundTag data = new CompoundTag();
-                this.data.forEach((k, v) -> data.putInt(k, this.data.get(k)));
-
-                tag.put("Data", data);
-            }
-
-            return tag;
-        }
-
-        @NotNull
-        private CompoundTag getCompoundTag() {
-            CompoundTag npcClass = new CompoundTag();
-            npcClass.putString("Age", this.npcClass.age().name());
-            npcClass.putBoolean("SmallArms", this.npcClass.smallArms());
-            npcClass.putFloat("Height", this.npcClass.height());
-            npcClass.putFloat("Offset", this.npcClass.offset());
-            npcClass.putBoolean("Invulnerable", this.npcClass.invulnerable());
-            npcClass.putBoolean("Immovable", this.npcClass.immovable());
-            npcClass.putBoolean("Underwater", this.npcClass.underwater());
-            npcClass.putBoolean("Floats", this.npcClass.floats());
-            npcClass.putBoolean("Invitable", this.npcClass.invitable());
-            npcClass.putInt("Lifespan", this.npcClass.lifespan());
-            npcClass.putBoolean("HideHearts", this.npcClass.hideHearts());
-            return npcClass;
-        }
-
-        public void randomise() {
-
+        public DynamicNPC build() {
+            DynamicNPC info = new DynamicNPC(uniqueID, npcClass, name, occupation, null, playerSkin, insideColor, outsideColor);
+            itemOverrides.forEach(pair -> info.giftItemOverrides.put(pair.getLeft(), (int) pair.getRight()));
+            info.giftCategoryOverrides.putAll(categoryOverrides);
+            info.responses.putAll(giftResponses);
+            info.data.putAll(data);
+            info.greetings.addAll(greetings);
+            return info;
         }
     }
 }

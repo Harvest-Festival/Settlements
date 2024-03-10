@@ -1,37 +1,43 @@
 package uk.joshiejack.settlements.world.entity.ai.action.move;
 
+import com.google.common.collect.Sets;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
-import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
-//TODO: @PenguinLoader("teleport")
-public class ActionTeleport extends ActionPhysical {
-    private BlockPos target;
+import java.util.Set;
 
-    @Override
-    public ActionTeleport withData(Object... params) {
-        this.target = WrapperRegistry.unwrap(params[0]);
-        return this;
+public class SleepAction extends ActionPhysical {
+    private final Set<BlockPos> searched = Sets.newHashSet();
+    private Direction facing;
+
+    public SleepAction() {}
+    public SleepAction(Direction facing) {
+        this.facing = facing;
     }
 
     @Override
     public InteractionResult execute(NPCMob npc) {
-        npc.setPos(target.getX() + 0.5, target.getY(), target.getZ() + 0.5);
+        // Find the closest bed for this npc
+        // Teleport them there and make them sleep in it
+
+
+        npc.setAnimation("sleep", facing);
         return InteractionResult.SUCCESS;
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        tag.putLong("Target", target.asLong());
+        tag.putString("Facing", facing.getSerializedName());
         return tag;
     }
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        this.target = BlockPos.of(tag.getLong("Target"));
+        facing = Direction.byName(tag.getString("Facing"));
     }
 }

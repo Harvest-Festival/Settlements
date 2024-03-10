@@ -8,11 +8,11 @@ import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.PenguinLib;
 import uk.joshiejack.penguinlib.util.registry.Packet;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionGreet;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.GreetAction;
 
 @SuppressWarnings("unused")
 @Packet(PacketFlow.CLIENTBOUND)
-public class PacketGreet extends PacketButtonLoad<ActionGreet> {
+public class PacketGreet extends PacketButtonLoad<GreetAction> {
     public static final ResourceLocation ID = PenguinLib.prefix("greet");
 
     @Override
@@ -23,7 +23,7 @@ public class PacketGreet extends PacketButtonLoad<ActionGreet> {
     public PacketGreet(FriendlyByteBuf buf) {
         super(buf);
     }
-    public PacketGreet(Player player, NPCMob npc, ActionGreet action) {
+    public PacketGreet(Player player, NPCMob npc, GreetAction action) {
         super(player, npc, action);
     }
 

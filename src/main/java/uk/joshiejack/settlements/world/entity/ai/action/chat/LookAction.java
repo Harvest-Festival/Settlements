@@ -4,8 +4,7 @@ import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-//TODO@PenguinLoader("look")
-public class ActionLook extends ActionMental {
+public class LookAction extends ActionMental {
     private int lookTimer;
 
     @Override

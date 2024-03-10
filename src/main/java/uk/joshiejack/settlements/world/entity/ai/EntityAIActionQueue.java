@@ -45,7 +45,7 @@ public class EntityAIActionQueue extends Goal implements INBTSerializable<ListTa
     }
 
     public void addToHead(LinkedList<Action> object) {
-       Lists.reverse(object).forEach(queue::addFirst); //Reverse the list to add it in the correct order at the head of the queue
+        Lists.reverse(object).forEach(queue::addFirst); //Reverse the list to add it in the correct order at the head of the queue
         current = null; //Clear out the head of the queue
     }
 
@@ -69,7 +69,7 @@ public class EntityAIActionQueue extends Goal implements INBTSerializable<ListTa
 
     @Override
     public void start() {
-       //TODO: Clear Path? npc.getNavigator().clearPath();
+        //TODO: Clear Path? npc.getNavigator().clearPath();
     }
 
     @Override
@@ -78,7 +78,9 @@ public class EntityAIActionQueue extends Goal implements INBTSerializable<ListTa
         queue.forEach(action -> {
             CompoundTag tag = new CompoundTag();
             tag.putString("Type", action.getType());
-            tag.put("Data", action.serializeNBT());
+            CompoundTag data = action.serializeNBT();
+            if (data != null)
+                tag.put("Data", data);
             list.add(tag);
         });
 
@@ -87,10 +89,11 @@ public class EntityAIActionQueue extends Goal implements INBTSerializable<ListTa
 
     @Override
     public void deserializeNBT(ListTag list) {
+        CompoundTag EMPTY = new CompoundTag();
         for (int i = 0; i < list.size(); i++) {
             CompoundTag tag = list.getCompound(i);
-            Action action = Action.createOfType(tag.getString("Type"));
-            action.deserializeNBT(tag.getCompound("Data"));
+            Action action = tag.contains("Data") ? Action.createOfType(tag.getString("Type"), tag.getCompound("Data")) :
+                    Action.createOfType(tag.getString("Type"), EMPTY);
             queue.add(action); //This might help ;)
         }
     }

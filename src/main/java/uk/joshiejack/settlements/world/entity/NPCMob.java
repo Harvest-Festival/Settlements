@@ -40,7 +40,9 @@ import uk.joshiejack.settlements.network.npc.PacketSetAnimation;
 import uk.joshiejack.settlements.world.entity.ai.EntityAIActionQueue;
 import uk.joshiejack.settlements.world.entity.ai.EntityAISchedule;
 import uk.joshiejack.settlements.world.entity.ai.EntityAITalkingTo;
-import uk.joshiejack.settlements.world.entity.ai.action.chat.ActionGreet;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.GreetAction;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.LookAction;
+import uk.joshiejack.settlements.world.entity.ai.action.move.AttackAction;
 import uk.joshiejack.settlements.world.entity.animation.Animation;
 import uk.joshiejack.settlements.world.entity.npc.Age;
 import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
@@ -55,9 +57,7 @@ import java.util.UUID;
 public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     protected static final EntityDataAccessor<Byte> DATA_PLAYER_MODE_CUSTOMISATION = SynchedEntityData.defineId(NPCMob.class, EntityDataSerializers.BYTE);
     public float renderOffsetX, renderOffsetY, renderOffsetZ;
-    protected CompoundTag custom;
-    protected NPC npc;
-    protected NPCInfo info;
+    protected NPCInfo npc;
     private final Set<Player> talkingTo = Sets.newHashSet();
     private int town = 0; //Default unset value
     private Animation animation;
@@ -67,7 +67,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     private boolean lootDisabled;
 
     public NPCMob(EntityType<? extends AgeableMob> type, Level world) {
-        this(type, world, NPC.NULL, null);
+        this(type, world, NPC.NULL);
     }
 
     @SuppressWarnings("unchecked")
@@ -75,35 +75,33 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     @Override
     public AgeableMob getBreedOffspring(ServerLevel level, @NotNull AgeableMob parent) {
         ResourceLocation uniqueID = new ResourceLocation("custom", UUID.randomUUID().toString());
-        CompoundTag tag = new DynamicNPC.Builder(level.random, uniqueID).build();
+        DynamicNPC.Builder builder = new DynamicNPC.Builder(level.random, uniqueID);
         //TODO: Maybe move to town.getCensus().createCustomNPC???
-        NPCMob npc =  new NPCMob((EntityType<? extends AgeableMob>) parent.getType(), level, NPC.NULL, tag);
+        NPCMob npc = new NPCMob((EntityType<? extends AgeableMob>) parent.getType(), level, builder.build());
         npc.setAge(-24000);
         return npc;
     }
 
-    public NPCMob(EntityType<? extends AgeableMob> type, Level world, @Nonnull NPC npc, @Nullable CompoundTag customData) {
+    public NPCMob(EntityType<? extends AgeableMob> type, Level world, @Nonnull NPCInfo npc) {
         super(type, world);
         this.npc = npc;
-        this.custom = customData == null ? new CompoundTag() : customData;
-        this.info = custom.isEmpty() ? npc : DynamicNPC.fromTag(custom);
         this.setPersistenceRequired();
         this.initNPCData();
         setPathfindingMalus(BlockPathTypes.WATER, -1.0F);
         if (!world.isClientSide) {
-            this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte)0);
+            this.getEntityData().set(DATA_PLAYER_MODE_CUSTOMISATION, (byte) 0);
         }
     }
 
     @SuppressWarnings("unchecked")
     public NPCMob(NPCMob entity) {
-        this((EntityType<? extends AgeableMob>) entity.getType(), entity.level(), entity.npc, entity.custom);
+        this((EntityType<? extends AgeableMob>) entity.getType(), entity.level(), entity.npc);
     }
 
     @Override
     protected void defineSynchedData() {
         super.defineSynchedData();
-        this.entityData.define(DATA_PLAYER_MODE_CUSTOMISATION, (byte)0);
+        this.entityData.define(DATA_PLAYER_MODE_CUSTOMISATION, (byte) 0);
     }
 
     public void setDropItemsWhenDead(boolean dropWhenDead) {
@@ -111,20 +109,16 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     }
 
     private void initNPCData() {
-        if (info == null || info.getNPCClass() == null)
+        if (npc == null || npc.getNPCClass() == null)
             this.setRemoved(RemovalReason.DISCARDED);
         else {
-            this.lifespan = info.getNPCClass().lifespan();
-            float modifier = info.getNPCClass().height();
+            this.lifespan = npc.getNPCClass().lifespan();
+            float modifier = npc.getNPCClass().height();
             //TODO? setSize(0.6F * modifier, 1.6F * modifier);
-            setInvulnerable(info.getNPCClass().invulnerable());
+            setInvulnerable(npc.getNPCClass().invulnerable());
             //TODO>? this.noClip = info.getNPCClass().isImmovable();
-            setNoGravity(info.getNPCClass().immovable());
+            setNoGravity(npc.getNPCClass().immovable());
         }
-    }
-
-    public CompoundTag getCustomData() {
-        return custom;
     }
 
     @Override
@@ -136,13 +130,13 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     public void onAddedToWorld() {
         super.onAddedToWorld(); //Call the server trackers for the spawning of this npc
         if (!level().isClientSide)
-            info.callScript("onNPCSpawned", this);
+            npc.callScript("onNPCSpawned", this);
     }
 
     @Override
     protected void registerGoals() {
-        ((GroundPathNavigation)this.getNavigation()).setCanPassDoors(true);
-        ((GroundPathNavigation)this.getNavigation()).setCanOpenDoors(true);
+        ((GroundPathNavigation) this.getNavigation()).setCanPassDoors(true);
+        ((GroundPathNavigation) this.getNavigation()).setCanOpenDoors(true);
         goalSelector.addGoal(0, new FloatGoal(this));
         goalSelector.addGoal(0, new EntityAITalkingTo(this));
         //TODO? goalSelector.addGoal(1, new EntityAIWatchClosest(this, Player.class, 8.0F));
@@ -237,7 +231,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     @Override
     @Nonnull
     public Component getName() {
-        return info.name();
+        return npc.name();
     }
 
     public boolean IsNotTalkingTo(Player player) {
@@ -258,7 +252,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
 
     @Override
     public boolean isBaby() {
-        return info.getNPCClass().age() == Age.CHILD;
+        return npc.getNPCClass().age() == Age.CHILD;
     }
 
     @Override
@@ -276,7 +270,9 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
                 if (mentalAI.getCurrent() == null && mentalAI.all().isEmpty() && talkingTo.isEmpty()) {
                     //If a quest has been started by the event, we'd know this if the npc is talking
                     //If they aren't talking, open the random chat
-                    mentalAI.addToEnd(new ActionGreet().withPlayer(serverPlayer));
+                    mentalAI.addToEnd(new LookAction().withPlayer(serverPlayer));
+                    mentalAI.addToEnd(new GreetAction().withPlayer(serverPlayer));
+                    physicalAI.addToEnd(new AttackAction(1F).withPlayer(serverPlayer));
                 }
 
                 lifespan = npc.getNPCClass().lifespan(); //Reset the lifespan
@@ -309,7 +305,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
             if (npc.getNPCClass().lifespan() > 0) {
                 lifespan--;
                 if (lifespan <= 0) {
-                    dropFromLootTable(damageSources().magic(),false);
+                    dropFromLootTable(damageSources().magic(), false);
                     this.setRemoved(RemovalReason.DISCARDED); //Kill the bitch
                 }
             }
@@ -392,26 +388,33 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     @Override
     public void readAdditionalSaveData(@NotNull CompoundTag nbt) {
         super.readAdditionalSaveData(nbt);
-        npc = NPC.getNPCFromRegistry(new ResourceLocation(nbt.getString("NPC")));
+        if (nbt.getTagType("NPC") == CompoundTag.TAG_STRING)
+            npc = Settlements.Registries.NPCS.getOrEmpty(new ResourceLocation(nbt.getString("NPC")));
+        else if (nbt.getTagType("NPC") == CompoundTag.TAG_COMPOUND) {
+            npc = DynamicNPC.fromTag(nbt.getCompound("NPC"));
+        }
+
         //TODO? if (npc == NPC.NULL) this.setRemoved(RemovalReason.DISCARDED); //Kill off null npcs
         physicalAI.deserializeNBT(nbt.getList("PhysicalActions", 10));
         mentalAI.deserializeNBT(nbt.getList("MentalActions", 10));
         lootDisabled = nbt.getBoolean("LootDisabled");
         town = nbt.getInt("Town");
-        custom = nbt.getCompound("Custom");
-        info = custom.isEmpty() ? npc : DynamicNPC.fromTag(custom);
         initNPCData(); //Reload in the data where applicable
     }
 
     @Override
     public void addAdditionalSaveData(@Nonnull CompoundTag nbt) {
         super.addAdditionalSaveData(nbt);
-        nbt.putString("NPC", npc.id().toString());
+        if (npc instanceof NPC)
+            nbt.putString("NPC", npc.id().toString());
+        else if (npc instanceof DynamicNPC dynamic) {
+            nbt.put("NPC", dynamic.toTag());
+        }
+
         nbt.put("PhysicalActions", physicalAI.serializeNBT());
         nbt.put("MentalActions", mentalAI.serializeNBT());
         nbt.putBoolean("LootDisabled", lootDisabled);
         nbt.putInt("Town", town);
-        nbt.put("Custom", custom);
     }
 
     @Override
@@ -421,17 +424,25 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
             buf.writeUtf(animation.getID());
         }
 
-        PenguinNetwork.writeRegistry(npc, buf);
-        buf.writeNbt(custom);
+        buf.writeBoolean(npc instanceof NPC);
+        if (npc instanceof NPC npc2)
+            PenguinNetwork.writeRegistry(npc2, buf);
+        else if (npc instanceof DynamicNPC dynamic)
+            buf.writeNbt(dynamic.toTag());
     }
 
     @Override
     public void readSpawnData(FriendlyByteBuf buf) {
         if (buf.readBoolean()) setAnimation(buf.readUtf()); //Animation bitch
-        npc = PenguinNetwork.readRegistry(Settlements.Registries.NPCS, buf);
-        custom = buf.readNbt();
-        assert custom != null;
-        info = custom.isEmpty() ? npc : DynamicNPC.fromTag(custom);
+        boolean isNormalNPC = buf.readBoolean();
+        if (isNormalNPC)
+            npc = PenguinNetwork.readRegistry(Settlements.Registries.NPCS, buf);
+        else {
+            CompoundTag tag = buf.readNbt();
+            if (tag != null)
+                npc = DynamicNPC.fromTag(tag);
+        }
+
         initNPCData(); //Update the data on the client side too
     }
 
@@ -455,16 +466,8 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     }
 
     @Nonnull
-    public NPCInfo getInfo() {
-        return info;
-    }
-
-    public NPC getBaseNPC() {
+    public NPCInfo getNPC() {
         return npc;
-    }
-
-    public String substring(String name) {
-        return info.substring(name);
     }
 
     public Animation getAnimation() {

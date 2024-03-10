@@ -9,7 +9,7 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
 
 //TODO@PenguinLoader("attack")
-public class ActionAttack extends ActionPhysical {
+public class AttackAction extends ActionPhysical {
     private MeleeAttackGoal ai;
     private int delayCounter;
     private int attackTick;
@@ -18,17 +18,13 @@ public class ActionAttack extends ActionPhysical {
     private double targetZ;
     private double speed;
 
-    public ActionAttack withData(Object... params) {
-        this.speed = (double) params[0];
-        return this;
+    public AttackAction() {}
+    public AttackAction(double speed) {
+        this.speed = speed;
     }
 
     @Override
     public InteractionResult execute(NPCMob attacker) {
-        if (ai == null) {
-            ai = new MeleeAttackGoal(attacker, 1.0D, false);
-        }
-
         if (player != null) {
             attacker.setTarget(player);
             attacker.getLookControl().setLookAt(player, 30.0F, 30.0F);

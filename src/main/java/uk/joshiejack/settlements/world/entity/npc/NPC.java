@@ -102,6 +102,7 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     }
 
     @Nullable
+    @Override
     public ResourceLocation getLootTable() {
         return lootTable;
     }

@@ -13,15 +13,14 @@ import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 import java.util.function.Function;
 
 //TODO: @PenguinLoader("take_item")
-public class ActionTake extends ActionMental {
+public class TakeItemAction extends ActionMental {
     private String holder;
     private int amount;
 
-    @Override
-    public ActionTake withData(Object... params) {
-        this.holder = (String) params[0];
-        this.amount = (int) params[1];
-        return this;
+    public TakeItemAction() {}
+    public TakeItemAction(String holder, int amount) {
+        this.holder = holder;
+        this.amount = amount;
     }
 
     @Override
