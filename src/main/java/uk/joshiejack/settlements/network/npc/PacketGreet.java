@@ -1,12 +1,15 @@
 package uk.joshiejack.settlements.network.npc;
 
+import net.minecraft.client.Minecraft;
 import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.Entity;
 import net.minecraft.world.entity.player.Player;
 import uk.joshiejack.penguinlib.PenguinLib;
+import uk.joshiejack.penguinlib.client.gui.SimpleChatter;
 import uk.joshiejack.penguinlib.util.registry.Packet;
+import uk.joshiejack.settlements.client.gui.NPCChatScreen;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.GreetAction;
 
@@ -32,7 +35,9 @@ public class PacketGreet extends PacketButtonLoad<GreetAction> {
         super.handle(player);
         Entity entity = player.level().getEntity(npcID);
         if (entity instanceof NPCMob npc) {
-            //TODOD Minecraft.getInstance().displayGuiScreen(new GuiNPCChat(npc, new Chatter(npc.getInfo().getGreeting(player.world.rand)), player.getDisplayNameString(), entity.getName()));
+            Minecraft.getInstance().setScreen(new NPCChatScreen(npc,
+                    buttons,
+                    new SimpleChatter(npc.getNPC().getGreeting(player.level().random))));
         }
     }
 }

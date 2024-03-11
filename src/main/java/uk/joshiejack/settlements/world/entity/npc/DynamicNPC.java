@@ -28,12 +28,9 @@ import uk.joshiejack.settlements.Settlements;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftCategory;
 import uk.joshiejack.settlements.world.entity.npc.gifts.GiftQuality;
 
-import javax.annotation.Nullable;
 import java.awt.*;
-import java.util.Collections;
-import java.util.HashSet;
 import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 public class DynamicNPC implements NPCInfo {
     public static final List<String> NAMES = List.of("joshiejack");
@@ -50,9 +47,7 @@ public class DynamicNPC implements NPCInfo {
     private final ItemStack icon;
     private final ResourceLocation script;
     private Interpreter<?> it;
-    private ResourceLocation skin;
-    @Nullable
-    private GameProfile owner;
+    private final ResourceLocation skin;
 
     private DynamicNPC(ResourceLocation uniqueID, NPCClass npcClass, String name, String occupation, ResourceLocation schedulerScript,
                        String playerSkin, int insideColor, int outsideColor) {
@@ -62,9 +57,13 @@ public class DynamicNPC implements NPCInfo {
         this.occupation = occupation;
         this.script = schedulerScript;
         this.skinName = playerSkin;
-        if (!skinName.contains(":"))
-            dynamicSkin = new DynamicSkin(new MutableObject<>(null));
-        else dynamicSkin = null;
+        if (!skinName.contains(":")) {
+            dynamicSkin = new DynamicSkin(new MutableObject<>(DynamicSkin.RANDOM));
+            skin = NPC.MISSING_TEXTURE;
+        } else {
+            dynamicSkin = null;
+            skin = new ResourceLocation(skinName);
+        }
         this.insideColor = insideColor;
         this.outsideColor = outsideColor;
         this.icon = new ItemStack(Items.ACACIA_BOAT); //TODO :new ItemStack(AdventureItems.NPC_SPAWNER);
@@ -250,22 +249,28 @@ public class DynamicNPC implements NPCInfo {
 
     @Override
     public ResourceLocation getSkin() {
-        if (skin != null) return skin;
-        if (dynamicSkin != null) {
-            skin = dynamicSkin.resolve(skinName);
-        } else skin = new ResourceLocation(skinName);
-
-        return skin;
+        if (dynamicSkin != null)
+            return dynamicSkin.resolve(skinName).getSkin().texture();
+        else return skin;
     }
 
-    public record DynamicSkin(Mutable<ResourceLocation> resolvedSkin)  {
-        @Nullable
-        public ResourceLocation resolve(String playerSkin) {
+    public record DynamicSkin(Mutable<PlayerInfo> resolvedSkin)  {
+        private static final Map<String, PlayerInfo> CACHE = Maps.newHashMap();
+        public static final PlayerInfo RANDOM = new PlayerInfo(new GameProfile(UUID.randomUUID(), "temporary"), false);
+
+        public PlayerInfo resolve(String playerSkin) {
+            PlayerInfo cached = CACHE.get(playerSkin);
+            if (cached != null) return cached;
+
             SkullBlockEntity.fetchGameProfile(playerSkin).thenAcceptAsync(profile -> {
                 if (profile.isPresent()) {
-                    resolvedSkin.setValue(new PlayerInfo(profile.get(), false).getSkin().texture());
-                } else resolvedSkin.setValue(null);
+                    resolvedSkin.setValue(new PlayerInfo(profile.get(), false));
+                } else resolvedSkin.setValue(RANDOM);
             });
+
+            if (resolvedSkin.getValue() != RANDOM) {
+                CACHE.put(playerSkin, resolvedSkin.getValue());
+            }
 
             return resolvedSkin.getValue();
         }

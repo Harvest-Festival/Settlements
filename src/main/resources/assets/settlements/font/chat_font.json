@@ -1,0 +1,11 @@
+{
+  "providers": [
+    {
+      "type": "ttf",
+      "file": "settlements:chat_font.ttf",
+      "shift": [0, 0],
+      "size": 8.0,
+      "oversample": 3
+    }
+  ]
+}

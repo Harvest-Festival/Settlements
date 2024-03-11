@@ -20,24 +20,24 @@ public class PacketButtonLoad<A extends Action> implements PenguinPacket {
         return ID;
     }
 
-    private final List<NPCButtons.ButtonData> list;
+    protected final List<NPCButtons.ButtonData> buttons;
     protected A action;
     protected int npcID;
 
     public PacketButtonLoad(Player player, NPCMob npc, A action) {
         this.npcID = npc.getId();
         this.action = action;
-        this.list = NPCButtons.getForDisplay(npc, player);
+        this.buttons = NPCButtons.getForDisplay(npc, player);
     }
 
     @SuppressWarnings("unchecked, ConstantConditions")
     public PacketButtonLoad(FriendlyByteBuf buf) {
         action = (A) Action.createOfType(buf.readUtf(), buf.readNbt());
         npcID = buf.readInt();
-        list = Lists.newArrayList();
+        buttons = Lists.newArrayList();
         int count = buf.readByte();
         for (int i = 0; i < count; i++) {
-            list.add(new NPCButtons.ButtonData(buf));
+            buttons.add(new NPCButtons.ButtonData(buf));
         }
     }
 
@@ -46,13 +46,7 @@ public class PacketButtonLoad<A extends Action> implements PenguinPacket {
         buf.writeUtf(action.getType());
         buf.writeNbt(action.serializeNBT());
         buf.writeInt(npcID);
-        buf.writeByte(list.size());
-        list.forEach(b-> b.toBytes(buf));
-    }
-
-
-    @Override
-    public void handle(Player player) {
-        //TODO: GUI STUFF GuiNPC.setButtons(list);
+        buf.writeByte(buttons.size());
+        buttons.forEach(b-> b.toBytes(buf));
     }
 }

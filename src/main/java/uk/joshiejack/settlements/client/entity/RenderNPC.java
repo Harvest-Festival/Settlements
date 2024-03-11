@@ -2,14 +2,12 @@ package uk.joshiejack.settlements.client.entity;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import com.mojang.authlib.GameProfile;
 import com.mojang.blaze3d.vertex.PoseStack;
 import net.minecraft.client.Minecraft;
 import net.minecraft.client.model.HumanoidArmorModel;
 import net.minecraft.client.model.HumanoidModel;
 import net.minecraft.client.model.PlayerModel;
 import net.minecraft.client.model.geom.ModelLayers;
-import net.minecraft.client.multiplayer.PlayerInfo;
 import net.minecraft.client.renderer.MultiBufferSource;
 import net.minecraft.client.renderer.entity.EntityRendererProvider;
 import net.minecraft.client.renderer.entity.HumanoidMobRenderer;
@@ -33,8 +31,6 @@ import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
 
 import javax.annotation.Nonnull;
-import javax.annotation.Nullable;
-import java.util.UUID;
 import java.util.concurrent.ExecutionException;
 
 public class RenderNPC extends HumanoidMobRenderer<NPCMob, PlayerModel<NPCMob>> {
@@ -66,12 +62,6 @@ public class RenderNPC extends HumanoidMobRenderer<NPCMob, PlayerModel<NPCMob>> 
             e.printStackTrace();
             return false;
         }
-    }
-
-    public static ResourceLocation getSkinFromUsernameOrUUID(@Nullable UUID uuid, @Nullable String playerSkin) {
-        GameProfile profile = SkinCache.getOrResolveGameProfile(uuid);
-        PlayerInfo info = new PlayerInfo(profile, false);
-        return info.getSkin().texture();
     }
 
     @Override

@@ -42,7 +42,6 @@ import uk.joshiejack.settlements.world.entity.ai.EntityAISchedule;
 import uk.joshiejack.settlements.world.entity.ai.EntityAITalkingTo;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.GreetAction;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.LookAction;
-import uk.joshiejack.settlements.world.entity.ai.action.move.AttackAction;
 import uk.joshiejack.settlements.world.entity.animation.Animation;
 import uk.joshiejack.settlements.world.entity.npc.Age;
 import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
@@ -270,9 +269,8 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
                 if (mentalAI.getCurrent() == null && mentalAI.all().isEmpty() && talkingTo.isEmpty()) {
                     //If a quest has been started by the event, we'd know this if the npc is talking
                     //If they aren't talking, open the random chat
-                    mentalAI.addToEnd(new LookAction().withPlayer(serverPlayer));
                     mentalAI.addToEnd(new GreetAction().withPlayer(serverPlayer));
-                    physicalAI.addToEnd(new AttackAction(1F).withPlayer(serverPlayer));
+                    mentalAI.addToEnd(new LookAction().withPlayer(serverPlayer));
                 }
 
                 lifespan = npc.getNPCClass().lifespan(); //Reset the lifespan
