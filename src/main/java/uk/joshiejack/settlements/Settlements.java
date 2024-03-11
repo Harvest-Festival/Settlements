@@ -125,6 +125,10 @@ public class Settlements {
                 Optional.of(new InclusiveRange<>(0, Integer.MAX_VALUE)))));
     }
 
+    public static ResourceLocation prefix(String name) {
+        return new ResourceLocation(MODID, name);
+    }
+
     public static class Registries {
         public static final ResourceLocation NONE = new ResourceLocation(Settlements.MODID, "none");
         public static final ReloadableRegistry<Building> BUILDINGS = new ReloadableRegistry<>(Settlements.MODID, "buildings", Building.CODEC, new Building(Template.EMPTY, Component.empty()), true);

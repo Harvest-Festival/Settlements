@@ -62,7 +62,8 @@ public class AskAction extends MentalAction implements ActionChat {
         if (parameters.length == 1) {
             int option = (int) parameters[0]; //Always the case
             Interpreter<?> it = isQuest ? QuestSavedData.get((ServerLevel) player.level()).getTrackerForQuest(player, Settlements.Registries.QUESTS.get(registryName)).getData(registryName).getInterpreter() : ScriptFactory.getScript(registryName);
-            it.callFunction(functions[option], player, npc, option);//Call this function with the option number
+            if (it != null)
+                it.callFunction(functions[option], player, npc, option);//Call this function with the option number
         }
 
         npc.removeTalking(player); //Close it no matter the circumstance

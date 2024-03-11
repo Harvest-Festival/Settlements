@@ -48,8 +48,8 @@ public class NPCAskScreen extends NPCScreen {
     @Override
     protected void initScreen(@NotNull Minecraft minecraft, @NotNull Player player) {
         super.initScreen(minecraft, player);
-        this.startY = hasQuestion ? window.getGuiScaledHeight() - 85 : window.getGuiScaledHeight() - 94;
-        addRenderableWidget(new AnswerButton(this, -1, question, leftPos + 20, window.getGuiScaledHeight() - 94));
+        this.startY = hasQuestion ? window.getGuiScaledHeight() - 84 : window.getGuiScaledHeight() - 93;
+        if (hasQuestion) addRenderableOnly(new AnswerButton(this, -1, question, leftPos + 4, window.getGuiScaledHeight() - 93));
         for (int i = 0; i < answers.length; i++) {
             addRenderableWidget(new AnswerButton(this, i, answers[i], leftPos + 20, startY + (i * 9)));
         }
@@ -122,7 +122,12 @@ public class NPCAskScreen extends NPCScreen {
             graphics.blit(CHATBOX, x, window.getGuiScaledHeight() - 75 + (i * 9), 0, 78, 256, 9);
         }
 
+        graphics.setColor(1F, 1F, 1F, 1F);
         renderForeground(graphics, mouseX, mouseY, pPartialTick);
+    }
+
+    @Override
+    protected void renderForeground(GuiGraphics guiGraphics, int i, int i1, float v) {
         //TODO Draw NPC Name
 //        GlStateManager.color(1F, 1F, 1F, 1F);
 //        GlStateManager.disableBlend();
@@ -132,8 +137,23 @@ public class NPCAskScreen extends NPCScreen {
     }
 
     @Override
-    protected void renderForeground(GuiGraphics guiGraphics, int i, int i1, float v) {
+    public boolean charTyped(char character, int key) {
+        if (character == 'w' || key == 200) {
+            adjustSelection(-1);
+            return true;
+        }
 
+        if (character == 's' || key == 208) {
+            adjustSelection(+1);
+            return true;
+        }
+
+        if (key == 28 || key == 57 || character == 'q') {
+            setFinished();
+            return true;
+        }
+
+        return super.charTyped(character, key);
     }
 
 //    @Override
