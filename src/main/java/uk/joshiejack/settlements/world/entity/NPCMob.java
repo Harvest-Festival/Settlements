@@ -40,7 +40,7 @@ import uk.joshiejack.settlements.network.npc.PacketSetAnimation;
 import uk.joshiejack.settlements.world.entity.ai.EntityAIActionQueue;
 import uk.joshiejack.settlements.world.entity.ai.EntityAISchedule;
 import uk.joshiejack.settlements.world.entity.ai.EntityAITalkingTo;
-import uk.joshiejack.settlements.world.entity.ai.action.chat.GreetAction;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.AskAction;
 import uk.joshiejack.settlements.world.entity.ai.action.chat.LookAction;
 import uk.joshiejack.settlements.world.entity.animation.Animation;
 import uk.joshiejack.settlements.world.entity.npc.Age;
@@ -62,6 +62,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     private Animation animation;
     private EntityAIActionQueue physicalAI;
     private EntityAIActionQueue mentalAI;
+    private EntityAIActionQueue lookAI;
     private int lifespan;
     private boolean lootDisabled;
 
@@ -141,7 +142,9 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
         //TODO? goalSelector.addGoal(1, new EntityAIWatchClosest(this, Player.class, 8.0F));
         //TODO? goalSelector.addGoal(4, new EntityAIOpenDoor(this, true));
         physicalAI = new EntityAIActionQueue(this, Goal.Flag.MOVE);
-        mentalAI = new EntityAIActionQueue(this, Goal.Flag.LOOK);
+        mentalAI = new EntityAIActionQueue(this, Goal.Flag.TARGET);
+        lookAI = new EntityAIActionQueue(this, Goal.Flag.LOOK);
+        goalSelector.addGoal(5, lookAI);
         goalSelector.addGoal(6, mentalAI);
         goalSelector.addGoal(6, physicalAI);
         goalSelector.addGoal(7, new EntityAISchedule(this));
@@ -227,6 +230,10 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
         return physicalAI;
     }
 
+    public EntityAIActionQueue getLookAI() {
+        return lookAI;
+    }
+
     @Override
     @Nonnull
     public Component getName() {
@@ -269,8 +276,9 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
                 if (mentalAI.getCurrent() == null && mentalAI.all().isEmpty() && talkingTo.isEmpty()) {
                     //If a quest has been started by the event, we'd know this if the npc is talking
                     //If they aren't talking, open the random chat
-                    mentalAI.addToEnd(new GreetAction().withPlayer(serverPlayer));
-                    mentalAI.addToEnd(new LookAction().withPlayer(serverPlayer));
+                    lookAI.addToEnd(new LookAction().withPlayer(serverPlayer));
+                    //mentalAI.addToEnd(new GreetAction().withPlayer(serverPlayer));
+                    mentalAI.addToEnd(new AskAction(false, "How are you?", "Good->callback1", "Bad->callback2", "Well->callback3", "What->callback4", "Hmm->callback5").withPlayer(serverPlayer).withScript(new ResourceLocation("settlements", "npcs/greet"), false));
                 }
 
                 lifespan = npc.getNPCClass().lifespan(); //Reset the lifespan

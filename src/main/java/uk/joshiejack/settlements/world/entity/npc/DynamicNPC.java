@@ -350,7 +350,7 @@ public class DynamicNPC implements NPCInfo {
                 if (!keys.isEmpty())
                     setClass(keys.get(rand.nextInt(keys.size())));
                 else
-                    setClass(NPCClass.ADULT);
+                    setClass(rand.nextInt(5) == 0 ? NPCClass.ADULT : NPCClass.CHILD);
             }
 
             //Let's get a random number of items

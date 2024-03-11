@@ -8,10 +8,10 @@ import uk.joshiejack.penguinlib.scripting.wrapper.PlayerJS;
 import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
 import uk.joshiejack.settlements.scripting.wrapper.NPCStatusJS;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
 //TODO: @PenguinLoader("adjust_ncp_status")
-public class AdjustNPCStatusAction extends ActionMental {
+public class AdjustNPCStatusAction extends MentalAction {
     private String npcRegistryName = Strings.EMPTY;
     private String status;
     private Integer min;

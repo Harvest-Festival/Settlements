@@ -7,9 +7,7 @@ import net.minecraft.client.gui.font.FontSet;
 import net.minecraft.resources.ResourceLocation;
 import net.neoforged.neoforge.common.util.Lazy;
 import uk.joshiejack.penguinlib.client.gui.SimpleChatter;
-import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.settlements.Settlements;
-import uk.joshiejack.settlements.network.npc.PacketEndChat;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.npc.button.NPCButtons;
 
@@ -55,10 +53,7 @@ public class NPCChatScreen extends NPCScreen {
         return super.mouseClicked(x, y, mouseButton);
     }
 
-    @Override
-    public void removed() {
-        PenguinNetwork.sendToServer(new PacketEndChat(npc.getId()));
-    }
+
 
 //    @Override
 //    protected void drawOverlay(int x, int y) {

@@ -8,12 +8,12 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.item.ItemStack;
 import uk.joshiejack.penguinlib.util.helper.InventoryHelper;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
 import java.util.function.Function;
 
 //TODO: @PenguinLoader("take_item")
-public class TakeItemAction extends ActionMental {
+public class TakeItemAction extends MentalAction {
     private String holder;
     private int amount;
 

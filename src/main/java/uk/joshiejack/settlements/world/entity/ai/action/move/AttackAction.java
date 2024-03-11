@@ -6,10 +6,10 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.LivingEntity;
 import net.minecraft.world.entity.ai.goal.MeleeAttackGoal;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
+import uk.joshiejack.settlements.world.entity.ai.action.PhysicalAction;
 
 //TODO@PenguinLoader("attack")
-public class AttackAction extends ActionPhysical {
+public class AttackAction extends PhysicalAction {
     private MeleeAttackGoal ai;
     private int delayCounter;
     private int attackTick;

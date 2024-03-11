@@ -6,11 +6,11 @@ import net.minecraft.core.Direction;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
+import uk.joshiejack.settlements.world.entity.ai.action.PhysicalAction;
 
 import java.util.Set;
 
-public class SleepAction extends ActionPhysical {
+public class SleepAction extends PhysicalAction {
     private final Set<BlockPos> searched = Sets.newHashSet();
     private Direction facing;
 

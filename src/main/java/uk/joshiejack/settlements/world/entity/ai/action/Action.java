@@ -45,7 +45,7 @@ public abstract class Action implements INBTSerializable<CompoundTag> {
         }
     }
 
-    public abstract boolean isPhysical();
+    public abstract AIType getAIType();
 
     public boolean has(String... data) {
         return false;
@@ -89,6 +89,10 @@ public abstract class Action implements INBTSerializable<CompoundTag> {
     @Override
     public void deserializeNBT(CompoundTag nbt) {
 
+    }
+
+    public enum AIType {
+        PHYSICAL, MENTAL, LOOK
     }
 
     @Override

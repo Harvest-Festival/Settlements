@@ -4,10 +4,10 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
+import uk.joshiejack.settlements.world.entity.ai.action.PhysicalAction;
 
 //TODO: @PenguinLoader("teleport")
-public class TeleportAction extends ActionPhysical {
+public class TeleportAction extends PhysicalAction {
     private BlockPos target;
 
     public TeleportAction() {}

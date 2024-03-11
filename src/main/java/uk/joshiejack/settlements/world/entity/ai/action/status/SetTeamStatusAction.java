@@ -7,9 +7,9 @@ import uk.joshiejack.penguinlib.scripting.wrapper.ServerLevelJS;
 import uk.joshiejack.penguinlib.scripting.wrapper.TeamJS;
 import uk.joshiejack.penguinlib.world.team.PenguinTeams;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
-public class SetTeamStatusAction extends ActionMental {
+public class SetTeamStatusAction extends MentalAction {
     private String status;
     private int value;
 

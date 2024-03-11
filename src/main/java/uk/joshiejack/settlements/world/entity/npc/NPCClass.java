@@ -21,8 +21,9 @@ public record NPCClass(Age age, boolean smallArms, float height, float offset, b
             Codec.BOOL.fieldOf("invitable").forGetter(NPCClass::invitable),
             Codec.INT.fieldOf("lifespan").forGetter(NPCClass::lifespan),
             Codec.BOOL.fieldOf("hideHearts").forGetter(NPCClass::hideHearts)).apply(inst, NPCClass::new));
-    public static final NPCClass ADULT = new NPCClass(Age.ADULT, false, 1, 0, true, false, false, false, true, 0, false);
-    public static final NPCClass NULL = new NPCClass(Age.ADULT, false, 1, 0, true, false, false, false, false, 0, false);
+    public static final NPCClass ADULT = new NPCClass(Age.ADULT, false, 1, 0, false, false, false, false, true, 0, false);
+    public static final NPCClass CHILD = new NPCClass(Age.CHILD, true, 1F, 0, false, false, false, true, true, 0, false);
+    public static final NPCClass NULL = new NPCClass(Age.ADULT, false, 1, 0, true, false, false, false, false, 0, true);
 
     public NPCClass fromNetwork(FriendlyByteBuf buf) {
         return new NPCClass(buf.readEnum(Age.class),

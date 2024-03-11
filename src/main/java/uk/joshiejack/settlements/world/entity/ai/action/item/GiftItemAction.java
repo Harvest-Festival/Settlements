@@ -6,10 +6,10 @@ import net.minecraft.world.item.ItemStack;
 import net.neoforged.neoforge.items.ItemHandlerHelper;
 import uk.joshiejack.penguinlib.scripting.wrapper.ItemStackJS;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
 //@PenguinLoader("give_item")
-public class GiftItemAction extends ActionMental {
+public class GiftItemAction extends MentalAction {
     private ItemStack stack;
 
     public GiftItemAction() {}

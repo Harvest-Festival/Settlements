@@ -6,9 +6,9 @@ import net.minecraft.world.InteractionResult;
 import net.minecraft.world.level.Level;
 import uk.joshiejack.penguinlib.util.registry.ReloadableRegistry;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
-public abstract class AbstractActionRegistry<O extends ReloadableRegistry.PenguinRegistry<O>> extends ActionMental {
+public abstract class AbstractActionRegistry<O extends ReloadableRegistry.PenguinRegistry<O>> extends MentalAction {
     protected ResourceLocation resource;
     protected final ReloadableRegistry<O> registry;
 

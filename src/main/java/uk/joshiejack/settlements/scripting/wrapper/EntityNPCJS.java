@@ -19,7 +19,7 @@ public class EntityNPCJS extends LivingEntityJS<NPCMob> {
 
     public EntityNPCJS(NPCMob npcEntity) {
         super(npcEntity);
-        this.tasks = new NPCTaskJS(Lists.newLinkedList(), Lists.newLinkedList(), this);
+        this.tasks = new NPCTaskJS(Lists.newLinkedList(), Lists.newLinkedList(),  Lists.newLinkedList(),this);
     }
 
 //    public String substring(String name) {

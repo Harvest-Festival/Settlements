@@ -4,7 +4,7 @@ import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 
 //TODO@PenguinLoader("error")
-public class ErrorAction extends ActionMental {
+public class ErrorAction extends MentalAction {
     public static final Action INSTANCE = new ErrorAction();
 
     @Override

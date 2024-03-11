@@ -6,9 +6,9 @@ import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.settlements.network.npc.PacketGreet;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
-public class GreetAction extends ActionMental implements ActionChat {
+public class GreetAction extends MentalAction implements ActionChat {
     private boolean read;
     private boolean displayed;
 

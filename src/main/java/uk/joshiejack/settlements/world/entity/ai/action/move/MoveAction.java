@@ -4,9 +4,9 @@ import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
+import uk.joshiejack.settlements.world.entity.ai.action.PhysicalAction;
 
-public class MoveAction extends ActionPhysical {
+public class MoveAction extends PhysicalAction {
     private BlockPos target;
     private double speed;
 

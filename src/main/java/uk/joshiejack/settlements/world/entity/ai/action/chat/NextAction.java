@@ -6,9 +6,9 @@ import net.neoforged.neoforge.common.NeoForge;
 import uk.joshiejack.settlements.event.NPCEvent;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
-public class NextAction extends ActionMental implements ActionChat {
+public class NextAction extends MentalAction implements ActionChat {
     @Override
     public InteractionResult execute(NPCMob npc) {
         NPCEvent.NPCRightClickedEvent event = new NPCEvent.NPCRightClickedEvent(npc, player, player.getUsedItemHand());

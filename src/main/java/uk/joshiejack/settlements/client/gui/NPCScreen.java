@@ -9,6 +9,8 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.entity.player.Player;
 import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.client.gui.AbstractScreen;
+import uk.joshiejack.penguinlib.network.PenguinNetwork;
+import uk.joshiejack.settlements.network.npc.PacketEndChat;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.npc.button.NPCButtons;
 
@@ -34,6 +36,16 @@ public abstract class NPCScreen extends AbstractScreen {
         //super.outside = (220 << 24) | (npc.getNPC().getOutsideColor() & 0x00ffffff);
         this.inside = npc.getNPC().getInsideColor();
         this.outside = npc.getNPC().getOutsideColor();
+    }
+
+    @Override
+    public boolean isPauseScreen() {
+        return false;
+    }
+
+    @Override
+    public void removed() {
+        PenguinNetwork.sendToServer(new PacketEndChat(npc.getId()));
     }
 
     public static void setButtons(List<NPCButtons.ButtonData> buttons) {
@@ -68,7 +80,7 @@ public abstract class NPCScreen extends AbstractScreen {
         this.renderForeground(graphics, x, y, pPartialTick);
     }
 
-    private void setColor(GuiGraphics graphics, int color) {
+    protected void setColor(GuiGraphics graphics, int color) {
         float red = (color >> 16 & 255) / 255.0F;
         float green = (color >> 8 & 255) / 255.0F;
         float blue = (color & 255) / 255.0F;

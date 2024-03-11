@@ -7,9 +7,9 @@ import net.minecraft.world.InteractionResult;
 import uk.joshiejack.penguinlib.scripting.wrapper.WrapperRegistry;
 import uk.joshiejack.settlements.scripting.wrapper.NPCStatusJS;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
-public class SetNPCStatusAction extends ActionMental {
+public class SetNPCStatusAction extends MentalAction {
     private String npcRegistryName = Strings.EMPTY;
     private String status;
     private int value;

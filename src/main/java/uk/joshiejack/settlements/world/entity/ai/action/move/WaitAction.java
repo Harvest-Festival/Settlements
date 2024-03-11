@@ -3,10 +3,10 @@ package uk.joshiejack.settlements.world.entity.ai.action.move;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionPhysical;
+import uk.joshiejack.settlements.world.entity.ai.action.PhysicalAction;
 
 //@PenguinLoader("wait")
-public class WaitAction extends ActionPhysical {
+public class WaitAction extends PhysicalAction {
     private int ticks;
     private int targetTicks;
 

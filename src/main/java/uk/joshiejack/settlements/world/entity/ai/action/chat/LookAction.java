@@ -2,9 +2,8 @@ package uk.joshiejack.settlements.world.entity.ai.action.chat;
 
 import net.minecraft.world.InteractionResult;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
 
-public class LookAction extends ActionMental {
+public class LookAction extends uk.joshiejack.settlements.world.entity.ai.action.LookAction {
     private int lookTimer;
 
     @Override

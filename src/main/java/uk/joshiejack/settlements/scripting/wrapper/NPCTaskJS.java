@@ -17,8 +17,8 @@ public class NPCTaskJS extends AbstractJS<NPCTaskJS.TaskList> {
     private PlayerJS activePlayer;
     private ResourceLocation activeQuest;
 
-    public NPCTaskJS(LinkedList<Action> mentalList, LinkedList<Action> physicalList, EntityNPCJS npc) {
-        super(new TaskList(mentalList, physicalList));
+    public NPCTaskJS(LinkedList<Action> mentalList, LinkedList<Action> physicalList, LinkedList<Action> lookList, EntityNPCJS npc) {
+        super(new TaskList(mentalList, physicalList, lookList));
         this.activeNPC = npc;
     }
 
@@ -42,7 +42,8 @@ public class NPCTaskJS extends AbstractJS<NPCTaskJS.TaskList> {
         ResourceLocation registryName = new ResourceLocation(activeQuest.getNamespace().equals("quest") ? activeQuest.getPath() : activeQuest.toString());
         boolean isQuest = activeQuest.getNamespace().contains("quest");
         action.withPlayer((ServerPlayer) activePlayer.get()).withScript(registryName, isQuest);
-        if (action.isPhysical()) activeNPC.get().getPhysicalAI().addToEnd(action);
+        if (action.getAIType() == Action.AIType.PHYSICAL) activeNPC.get().getPhysicalAI().addToEnd(action);
+        else if (action.getAIType() == Action.AIType.LOOK) activeNPC.get().getLookAI().addToEnd(action);
         else activeNPC.get().getMentalAI().addToEnd(action);
         return this;
     }
@@ -64,21 +65,26 @@ public class NPCTaskJS extends AbstractJS<NPCTaskJS.TaskList> {
     public static class TaskList {
         final LinkedList<Action> physicalList;
         final LinkedList<Action> mentalList;
+        final LinkedList<Action> lookList;
 
-        TaskList(LinkedList<Action> mentalList, LinkedList<Action> physicalList) {
+        TaskList(LinkedList<Action> mentalList, LinkedList<Action> physicalList, LinkedList<Action> lookList) {
             this.mentalList = mentalList;
             this.physicalList = physicalList;
+            this.lookList = lookList;
         }
 
         void clear() {
             physicalList.clear();
             mentalList.clear();
+            lookList.clear();
         }
 
         void add(Action action) {
-            if (action.isPhysical()) {
+            if (action.getAIType() == Action.AIType.PHYSICAL) {
                 physicalList.add(action);
-            } else mentalList.add(action);
+            } else if (action.getAIType() == Action.AIType.LOOK)  {
+                lookList.add(action);
+            }else mentalList.add(action);
         }
     }
 }

@@ -7,10 +7,10 @@ import net.minecraft.resources.ResourceLocation;
 import net.minecraft.world.InteractionResult;
 import net.minecraft.world.entity.Entity;
 import uk.joshiejack.settlements.world.entity.NPCMob;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 
 //TODO: @PenguinLoader("spawn_entity")
-public class SpawnEntityAction extends ActionMental {
+public class SpawnEntityAction extends MentalAction {
     private ResourceLocation entityName;
     private BlockPos pos;
 

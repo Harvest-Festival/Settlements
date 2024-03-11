@@ -13,23 +13,25 @@ import uk.joshiejack.settlements.Settlements;
 import uk.joshiejack.settlements.network.npc.PacketAsk;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.ActionChat;
-import uk.joshiejack.settlements.world.entity.ai.action.ActionMental;
+import uk.joshiejack.settlements.world.entity.ai.action.MentalAction;
 import uk.joshiejack.settlements.world.level.QuestSavedData;
 
 import java.util.List;
 import java.util.Objects;
 
 //TODO@PenguinLoader("ask")
-public class AskAction extends ActionMental implements ActionChat {
+public class AskAction extends MentalAction implements ActionChat {
     public String question;
     public String[] answers;
     public String[] formatting;
     private String[] functions;
+    public boolean translate;
     private boolean asked;
     private boolean answered;
 
     public AskAction() {}
-    public AskAction(String... params) {
+    public AskAction(boolean translate, String... params) {
+        this.translate = translate;
         this.question = params[0];
         //Stuff
         List<String> answers = Lists.newArrayList();
@@ -54,22 +56,6 @@ public class AskAction extends ActionMental implements ActionChat {
         this.formatting = formatting.toArray(new String[0]);
     }
 
-    public AskAction(CompoundTag nbt) {
-        registryName = new ResourceLocation(nbt.getString("RegistryName"));
-        isQuest = nbt.getBoolean("IsQuest");
-        question = nbt.getString("Question");
-        int length = nbt.getByte("AnswersLength");
-        answers = new String[length];
-        for (int i = 0; i < length; i++) {
-            answers[i] = nbt.getString("Answer" + i);
-        }
-
-        formatting = new String[nbt.getByte("FormattingLength")];
-        for (int i = 0; i < formatting.length; i++) {
-            formatting[i] = nbt.getString("Formatting" + i);
-        }
-    }
-
     @Override
     public void onGuiClosed(Player player, NPCMob npc, Object... parameters) {
         answered = true; //To allow this to exit the forever loop
@@ -84,8 +70,12 @@ public class AskAction extends ActionMental implements ActionChat {
 
     @Override
     public InteractionResult execute(NPCMob npc) {
+        System.out.println("Execute AskAction");
+        System.out.println("Asked: " + asked);
+        System.out.println("Player: " + player);
         if (!asked && player != null) {
             asked = true; //Mark asked as true
+            System.out.println("Sending PacketAsk");
             PenguinNetwork.sendToClient(player, new PacketAsk(player, npc, this));
             npc.addTalking(player); //We're talk to this player
         }
@@ -97,6 +87,7 @@ public class AskAction extends ActionMental implements ActionChat {
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
+        tag.putBoolean("Translate", translate);
         tag.putString("RegistryName", registryName.toString());
         tag.putBoolean("IsQuest", isQuest);
         tag.putString("Question", question);
@@ -115,6 +106,7 @@ public class AskAction extends ActionMental implements ActionChat {
 
     @Override
     public void deserializeNBT(CompoundTag nbt) {
+        translate = nbt.getBoolean("Translate");
         registryName = new ResourceLocation(nbt.getString("RegistryName"));
         isQuest = nbt.getBoolean("IsQuest");
         question = nbt.getString("Question");
