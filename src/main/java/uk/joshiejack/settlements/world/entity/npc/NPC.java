@@ -41,11 +41,11 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     public static final Codec<NPC> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                     ResourceLocation.CODEC.optionalFieldOf("lootTable", null).forGetter(NPC::getLootTable),
                     ResourceLocation.CODEC.optionalFieldOf("script", null).forGetter(obj -> obj.script),
-                    Codec.STRING.fieldOf("playerSkin").forGetter(obj -> obj.playerSkin),
-                    Codec.STRING.fieldOf("occupation").forGetter(NPC::getOccupation),
+                    Codec.STRING.optionalFieldOf("playerSkin", null).forGetter(obj -> obj.playerSkin),
+                    Codec.STRING.optionalFieldOf("occupation", "villager").forGetter(NPC::getOccupation),
                     NPCClass.CODEC.optionalFieldOf("class", NPCClass.NULL).forGetter(obj -> obj.clazz),
-                    Codec.INT.fieldOf("insideColor").forGetter(NPC::getInsideColor),
-                    Codec.INT.fieldOf("outsideColor").forGetter(NPC::getOutsideColor),
+                    Codec.INT.optionalFieldOf("insideColor", 0xFFFFFF).forGetter(NPC::getInsideColor),
+                    Codec.INT.optionalFieldOf("outsideColor", 0x000000).forGetter(NPC::getOutsideColor),
                     ItemData.CODEC.listOf().optionalFieldOf("giftItemOverrides", null).forGetter(obj -> obj.giftItemOverrides.object2IntEntrySet().stream().map(e -> new ItemData(e.getKey(), e.getIntValue())).toList()),
                     CategoryData.CODEC.listOf().optionalFieldOf("giftCategoryOverrides", null).forGetter(obj -> obj.giftCategoryOverrides.object2IntEntrySet().stream().map(e -> new CategoryData(e.getKey(), e.getIntValue())).toList()))
             .apply(inst, NPC::new));

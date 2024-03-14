@@ -2,13 +2,16 @@ package uk.joshiejack.settlements.scripting.wrapper;
 
 import dev.latvian.mods.rhino.util.HideFromJS;
 import net.minecraft.core.BlockPos;
+import net.minecraft.network.chat.Component;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerPlayer;
 import uk.joshiejack.penguinlib.scripting.wrapper.AbstractJS;
 import uk.joshiejack.penguinlib.scripting.wrapper.PlayerJS;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
+import uk.joshiejack.settlements.world.entity.ai.action.chat.SayAction;
 import uk.joshiejack.settlements.world.entity.ai.action.move.AttackAction;
 import uk.joshiejack.settlements.world.entity.ai.action.move.MoveAction;
+import uk.joshiejack.settlements.world.entity.ai.action.status.AdjustNPCStatusAction;
 
 import java.util.LinkedList;
 
@@ -34,6 +37,18 @@ public class NPCTaskJS extends AbstractJS<NPCTaskJS.TaskList> {
 
     public NPCTaskJS moveTo(int x, int y, int z, double speed) {
         return queueAction(new MoveAction(new BlockPos(x, y, z), speed));
+    }
+
+    public NPCTaskJS adjustNPCStatus(String npc, String status, int amount, int minimum, int maximum) {
+        return queueAction(new AdjustNPCStatusAction(npc, status, amount, minimum, maximum));
+    }
+
+    public NPCTaskJS say(String text) {
+        return queueAction(new SayAction(Component.literal(text)));
+    }
+
+    public NPCTaskJS sayTranslated(String text) {
+        return queueAction(new SayAction(Component.translatable(text)));
     }
 
     @HideFromJS
