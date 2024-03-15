@@ -22,11 +22,14 @@ import uk.joshiejack.settlements.world.entity.npc.gifts.GiftCategory;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.List;
 
 import static net.minecraft.network.chat.TextColor.parseColor;
 
 public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCInfo {
+    private static final ResourceLocation NULL_ID = new ResourceLocation(Settlements.MODID, "null");
     public record ItemData(Ingredient item, int value) {
         public static final Codec<ItemData> CODEC = RecordCodecBuilder.create(inst -> inst.group(
                         Ingredient.CODEC.fieldOf("item").forGetter(ItemData::item),
@@ -42,38 +45,37 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     }
 
     public static final Codec<NPC> CODEC = RecordCodecBuilder.create(inst -> inst.group(
-                    ResourceLocation.CODEC.optionalFieldOf("loot_table", null).forGetter(NPC::getLootTable),
-                    ResourceLocation.CODEC.optionalFieldOf("script", null).forGetter(obj -> obj.script),
-                    Codec.STRING.optionalFieldOf("player_skin", null).forGetter(obj -> obj.playerSkin),
+                    ResourceLocation.CODEC.optionalFieldOf("loot_table", NULL_ID).forGetter(NPC::getLootTable),
+                    ResourceLocation.CODEC.optionalFieldOf("script", NULL_ID).forGetter(obj -> obj.script),
+                    Codec.STRING.optionalFieldOf("player_skin", Strings.EMPTY).forGetter(obj -> obj.playerSkin),
                     Codec.STRING.optionalFieldOf("occupation", "villager").forGetter(NPC::getOccupation),
                     NPCClass.CODEC.optionalFieldOf("class", NPCClass.NULL).forGetter(obj -> obj.clazz),
                     Codec.STRING.optionalFieldOf("inside_color", "#FFFFFF").forGetter(n -> n.insideColor),
                     Codec.STRING.optionalFieldOf("outside_color", "#000000").forGetter(n -> n.outsideColor),
-                    ItemData.CODEC.listOf().optionalFieldOf("gift_item_overrides", null).forGetter(obj -> obj.giftItemOverrides.object2IntEntrySet().stream().map(e -> new ItemData(e.getKey(), e.getIntValue())).toList()),
-                    CategoryData.CODEC.listOf().optionalFieldOf("gift_category_overrides", null).forGetter(obj -> obj.giftCategoryOverrides.object2IntEntrySet().stream().map(e -> new CategoryData(e.getKey(), e.getIntValue())).toList()))
+                    ItemData.CODEC.listOf().optionalFieldOf("gift_item_overrides", new ArrayList<>()).forGetter(obj -> obj.giftItemOverrides.object2IntEntrySet().stream().map(e -> new ItemData(e.getKey(), e.getIntValue())).toList()),
+                    CategoryData.CODEC.listOf().optionalFieldOf("gift_category_overrides", new ArrayList<>()).forGetter(obj -> obj.giftCategoryOverrides.object2IntEntrySet().stream().map(e -> new CategoryData(e.getKey(), e.getIntValue())).toList()))
             .apply(inst, NPC::new));
     public static final ResourceLocation MISSING_TEXTURE = new ResourceLocation(Settlements.MODID, "textures/entity/missing.png");
     private static final Object2IntMap<NPC> INSIDE_COLORS = new Object2IntOpenHashMap<>();
     private static final Object2IntMap<NPC> OUTSIDE_COLORS = new Object2IntOpenHashMap<>();
-    private static final ResourceLocation NULL_ID = new ResourceLocation(Settlements.MODID, "null");
-    public static final NPC NULL = new NPC(null, null, null, null, NPCClass.NULL, "#FFFFFF", "#000000", null, null).setOccupation(Strings.EMPTY).setNPCClass(NPCClass.NULL);
+    public static final NPC NULL = new NPC(NULL_ID, NULL_ID, Strings.EMPTY, Strings.EMPTY, NPCClass.NULL, "#FFFFFF", "#000000", Collections.emptyList(), Collections.emptyList()).setOccupation(Strings.EMPTY).setNPCClass(NPCClass.NULL);
     private final Object2IntMap<String> data = new Object2IntOpenHashMap<>();
     private final Object2IntMap<String> giftCategoryOverrides = new Object2IntOpenHashMap<>();
     private final Object2IntMap<Ingredient> giftItemOverrides = new Object2IntOpenHashMap<>();
-    private ResourceLocation lootTable;
-    private ResourceLocation script;
+    private final ResourceLocation lootTable;
+    private final ResourceLocation script;
     private String localizedName;
     private ResourceLocation skin;
     private String playerSkin;
     private String occupation;
     private NPCClass clazz;
-    private String insideColor;
-    private String outsideColor;
+    private final String insideColor;
+    private final String outsideColor;
 
-    public NPC(@Nullable ResourceLocation lootTable,
-               @Nullable ResourceLocation script,
-               @Nullable String playerSkin,
-               @Nullable String occupation,
+    public NPC(ResourceLocation lootTable,
+               ResourceLocation script,
+               String playerSkin,
+               String occupation,
                @Nonnull NPCClass clazz,
                String insideColor,
                String outsideColor,
@@ -106,23 +108,6 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
 
     //Set a resource skin
 
-    public void setScript(ResourceLocation script) {
-        this.script = script;
-    }
-
-    //Load a skin from the net
-    public void setSkin(String playerSkin) {
-        this.playerSkin = playerSkin;
-    }
-
-    public void setLocalizedName(String localizedName) {
-        this.localizedName = localizedName;
-    }
-
-    public void setLootTable(ResourceLocation lootTable) {
-        this.lootTable = lootTable;
-    }
-
     public String getUnlocalizedKey() {
         return id().getNamespace() + ".npc." + id().getPath();
     }
@@ -134,11 +119,11 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     @Nullable
     @Override
     public ResourceLocation getLootTable() {
-        return lootTable;
+        return lootTable.equals(NULL_ID) ? null : lootTable;
     }
 
     public void callScript(String function, Object... params) {
-        if (script != null) {
+        if (!script.equals(NULL_ID)) {
             ScriptFactory.getScript(script).callFunction(function, params);
         }
     }
@@ -182,13 +167,15 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     }
 
     public int getGiftQuality(ItemStack stack) {
-        if (giftItemOverrides.containsKey(stack.getItem())) {
-            return giftItemOverrides.get(stack.getItem());
+        for (Ingredient ingredient: giftItemOverrides.keySet()) {
+            if (ingredient.test(stack)) {
+                return giftItemOverrides.getInt(ingredient);
+            }
         }
 
         String category = stack.getItemHolder().getData(Settlements.Data.GIFT_CATEGORIES);
         if (giftCategoryOverrides.containsKey(category)) {
-            return giftCategoryOverrides.get(category);
+            return giftCategoryOverrides.getInt(category);
         }
 
         return GiftCategory.getValue(category);
@@ -216,10 +203,10 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     @OnlyIn(Dist.CLIENT)
     public ResourceLocation getSkin() {
         if (skin == null) {
-            if (playerSkin != null) {
+            if (!playerSkin.isEmpty()) {
                 //TODO skin = RenderNPC.getSkinFromUsernameOrUUID(null, playerSkin);
                 //We've loaded in the proper skin so let's remove this
-                playerSkin = null;
+                playerSkin = Strings.EMPTY;
             } else {
                 ResourceLocation key = id();
                 skin = new ResourceLocation(key.getNamespace(), "textures/entity/" + key.getPath() + ".png");
@@ -237,10 +224,10 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
     @Override
     public NPC fromNetwork(FriendlyByteBuf buf) {
         return new NPC(
-                buf.readBoolean() ? buf.readResourceLocation() : null,
-                buf.readBoolean() ? buf.readResourceLocation() : null,
-                buf.readBoolean() ? buf.readUtf(32767) : null,
-                buf.readBoolean() ? buf.readUtf(32767) : null,
+                buf.readResourceLocation(),
+                buf.readResourceLocation(),
+                buf.readUtf(32767),
+                buf.readUtf(32767),
                 clazz.fromNetwork(buf),
                 buf.readUtf(),
                 buf.readUtf(),
@@ -250,19 +237,10 @@ public final class NPC implements ReloadableRegistry.PenguinRegistry<NPC>, NPCIn
 
     @Override
     public void toNetwork(FriendlyByteBuf buf) {
-        buf.writeBoolean(lootTable != null);
-        if (lootTable != null)
-            buf.writeResourceLocation(lootTable);
-        buf.writeBoolean(script != null);
-        if (script != null)
-            buf.writeResourceLocation(script);
-        buf.writeBoolean(playerSkin != null);
-        if (playerSkin != null)
-            buf.writeUtf(playerSkin);
-        buf.writeBoolean(occupation != null);
-        if (occupation != null)
-            buf.writeUtf(occupation);
-
+        buf.writeResourceLocation(lootTable);
+        buf.writeResourceLocation(script);
+        buf.writeUtf(playerSkin);
+        buf.writeUtf(occupation);
         clazz.toNetwork(buf);
         buf.writeUtf(insideColor);
         buf.writeUtf(outsideColor);
