@@ -140,8 +140,8 @@ public class Settlements {
 
     @Mod.EventBusSubscriber(modid = Settlements.MODID, bus = Mod.EventBusSubscriber.Bus.MOD)
     public static class Data {
-        public static final DataMapType<Item, String> GIFT_CATEGORIES = DataMapType.builder(new ResourceLocation(Settlements.MODID, "gift_category"), net.minecraft.core.registries.Registries.ITEM,
-                Codec.STRING).synced(Codec.STRING, true).build();
+        public static final DataMapType<Item, String> GIFT_CATEGORIES = DataMapType.builder(new ResourceLocation(Settlements.MODID, "gift_category"),
+                net.minecraft.core.registries.Registries.ITEM, Codec.STRING).synced(Codec.STRING, true).build();
 
         @SubscribeEvent
         public static void onDataMap(RegisterDataMapTypesEvent event) {

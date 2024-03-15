@@ -17,6 +17,12 @@ public class SettlementsCreativeTab {
                 //Add all the item found in HCItems.ITEMS that don't conform to GATHERING_BLOCKS
                 SettlementsItems.ITEMS.getEntries().stream()
                         .map(DeferredHolder::get)
-                        .forEach(item -> output.accept(item.asItem()));
+                        .forEach(item -> {
+                            if (item == SettlementsItems.NPC_SPAWNER.get()) {
+                                Settlements.Registries.NPCS.stream()
+                                        .forEach(npc -> output.accept(SettlementsItems.NPC_SPAWNER.get().toStack(npc)));
+                            } else
+                                output.accept(item.asItem());
+                        });
             }).build());
 }
