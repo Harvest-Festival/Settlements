@@ -14,7 +14,7 @@ import java.util.Map;
 
 public class BuildingBlockGetter extends GhostBlockGetter<Map<BlockPos, Template.BlockData>> {
     public BuildingBlockGetter(Template building, Rotation rotation) {
-        super(rotate(building.getBlockData(), rotation), building.getXSize(), building.getYSize(), building.getZSize());
+        super(rotate(building.getBlockData(), rotation), building.size().getX(), building.size().getY(), building.size().getZ());
     }
 
     @SuppressWarnings("deprecation")
