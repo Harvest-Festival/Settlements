@@ -38,6 +38,9 @@ public class SettlementsBuildings extends AbstractPenguinRegistryProvider<Buildi
             }
         }
 
-        map.put(new ResourceLocation(Settlements.MODID, "test"), new Building(new Template(original, tempX, tempY, tempZ), Component.literal("Test Building")));
+        BlockPos size = new BlockPos(tempX, tempY, tempZ);
+        BlockPos offset = new BlockPos(0, 0, 0);
+
+        map.put(new ResourceLocation(Settlements.MODID, "test"), new Building(new Template(size, offset, original), Component.literal("Test Building")));
     }
 }

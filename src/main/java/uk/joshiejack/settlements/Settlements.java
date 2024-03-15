@@ -134,7 +134,7 @@ public class Settlements {
         public static final ReloadableRegistry<Building> BUILDINGS = new ReloadableRegistry<>(Settlements.MODID, "buildings", Building.CODEC, new Building(Template.EMPTY, Component.empty()), true);
         public static final ReloadableRegistry<Quest> QUESTS = new ReloadableRegistry<>(Settlements.MODID, "quests", Quest.CODEC, new Quest(Settings.DEFAULT), true);
         public static final ReloadableRegistry<GiftQuality> GIFT_QUALITIES = new ReloadableRegistry<>(Settlements.MODID, "gift_qualities", GiftQuality.CODEC, GiftQuality.NORMAL, true);
-        public static final ReloadableRegistry<NPC> NPCS = new ReloadableRegistry<>(Settlements.MODID, "npcs", NPC.CODEC, NPC.NULL, true);
+        public static final ReloadableRegistry<NPC> NPCS = new ReloadableRegistry<>(Settlements.MODID, "npcs", NPC.CODEC, NPC.UNKNOWN, true);
         public static void init() { }
     }
 

@@ -67,7 +67,7 @@ public class NPCMob extends AgeableMob implements IEntityWithComplexSpawn {
     private boolean lootDisabled;
 
     public NPCMob(EntityType<? extends AgeableMob> type, Level world) {
-        this(type, world, NPC.NULL);
+        this(type, world, NPC.UNKNOWN);
     }
 
     @SuppressWarnings("unchecked")
