@@ -2,38 +2,36 @@ package uk.joshiejack.settlements.world.level.town;
 
 import com.google.common.cache.Cache;
 import com.google.common.cache.CacheBuilder;
-import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
-import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
+import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
 import net.minecraft.core.BlockPos;
-import net.minecraft.entity.player.EntityPlayer;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
+import net.minecraft.resources.ResourceKey;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
-import uk.joshiejack.settlements.AdventureData;
-import uk.joshiejack.settlements.AdventureDataLoader;
 import uk.joshiejack.settlements.client.WorldMap;
 import uk.joshiejack.settlements.client.town.TownClient;
+import uk.joshiejack.settlements.world.level.TownSavedData;
 
 import java.util.Collection;
 import java.util.concurrent.ExecutionException;
 
 public class TownFinder {
-    private static final Int2ObjectMap<TownFinder> FINDERS_CLIENT = new Int2ObjectOpenHashMap<>();
-    private static final Int2ObjectMap<TownFinder> FINDERS_SERVER = new Int2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<ResourceKey<Level>, TownFinder> FINDERS_CLIENT = new Object2ObjectOpenHashMap<>();
+    private static final Object2ObjectMap<ResourceKey<Level>, TownFinder> FINDERS_SERVER = new Object2ObjectOpenHashMap<>();
     private final Cache<BlockPos, Town<?>> closest = CacheBuilder.newBuilder().build();
 
     public static TownFinder getFinder(Level world) {
-        TownFinder finder = findersMap(world).get(world.provider.getDimension());
+        TownFinder finder = findersMap(world).get(world.dimension());
         if (finder == null) {
             finder = new TownFinder();
-            findersMap(world).put(world.provider.getDimension(), finder);
+            findersMap(world).put(world.dimension(), finder);
         }
 
         return finder;
     }
 
-    private static Int2ObjectMap<TownFinder>findersMap(Level world) {
+    private static Object2ObjectMap<ResourceKey<Level>, TownFinder>findersMap(Level world) {
         return world.isClientSide ? FINDERS_CLIENT: FINDERS_SERVER;
     }
 
@@ -43,23 +41,23 @@ public class TownFinder {
 
     @SuppressWarnings("unchecked")
     public static <T extends Town<?>> T find(Level world, BlockPos pos) {
-        return (T) getFinder(world).find(world.isClientSide ? WorldMap.getTowns(world) : AdventureDataLoader.get(world).getTowns(world), pos, world.isRemote ? TownClient.NULL : TownServer.NULL);
+        return (T) getFinder(world).find(world.isClientSide ? WorldMap.getTowns(world) : TownSavedData.get((ServerLevel) world).getTowns(world), pos, world.isClientSide ? TownClient.NULL : TownServer.NULL);
     }
 
     public static Collection<? extends Town<?>> all(Level world) {
-        return world.isClientSide ? WorldMap.getTowns(world) : AdventureDataLoader.get(world).getTowns(world);
+        return world.isClientSide ? WorldMap.getTowns(world) : TownSavedData.get((ServerLevel) world).getTowns(world);
     }
 
     public static Town<?>[] towns(Level world) {
-        return AdventureDataLoader.get(world).getTowns(world).toArray(new Town[0]);
+        return TownSavedData.get((ServerLevel) world).getTowns(world).toArray(new Town[0]);
     }
 
     public TownServer findOrCreate(Player player, BlockPos pos) {
-        AdventureData data = AdventureDataLoader.get(player.level());
+        TownSavedData data = TownSavedData.get((ServerLevel) player.level());
         Collection<TownServer> towns = data.getTowns(player.level());
         Town<?> town = find(towns, pos, TownServer.NULL);
         if (town == TownServer.NULL) {
-            town = data.createTown(player.world, player);
+            town = data.createTown(player.level(), player);
         }
 
         return (TownServer) town;

@@ -13,6 +13,7 @@ import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
+import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.settlements.AdventureDataLoader;
@@ -112,7 +113,7 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserializeNBT(CompoundTag tag) {
         residents.clear(); //Updo
         NBTTagList inviteTagList = tag.getTagList("InviteList", 8);
         for (int i = 0; i < inviteTagList.tagCount(); i++) {
@@ -122,11 +123,11 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
         memorableActions.clear(); //Empty
         NBTTagList memorableList = tag.getTagList("MemorableList", 10);
         for (int i = 0; i < memorableList.tagCount(); i++) {
-            NBTTagCompound memorableNBT = memorableList.getCompoundTagAt(i);
+            CompoundTag memorableNBT = memorableList.getCompoundTagAt(i);
             ResourceLocation npc = new ResourceLocation(memorableNBT.getString("NPC"));
             NBTTagList actionList = memorableNBT.getTagList("Actions", 10);
             for (int j = 0; j < actionList.tagCount(); j++) {
-                NBTTagCompound actionNBT = actionList.getCompoundTagAt(j);
+                CompoundTag actionNBT = actionList.getCompoundTagAt(j);
                 Action action = Action.createOfType(actionNBT.getString("Type"));
                 action.deserializeNBT(actionNBT.getCompoundTag("Data"));
                 memorableActions.get(npc).add(action);
@@ -135,7 +136,7 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
 
         NBTTagList memorableDataList = tag.getTagList("CustomData", 10);
         for (int i = 0; i < memorableDataList.tagCount(); i++) {
-            NBTTagCompound data = memorableDataList.getCompoundTagAt(i);
+            CompoundTag data = memorableDataList.getCompoundTagAt(i);
             ResourceLocation npc = new ResourceLocation(data.getString("NPC"));
             ResourceLocation base = new ResourceLocation(data.getString("Base"));
             customNPCs.put(npc, Pair.of(base, data.getCompoundTag("Data")));
@@ -143,19 +144,19 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
         NBTTagList inviteTagList = new NBTTagList();
         inviteList.forEach(npc -> inviteTagList.appendTag(new NBTTagString(npc.toString())));
         tag.setTag("InviteList", inviteTagList);
         //Action memory
         NBTTagList memorableList = new NBTTagList();
         memorableActions.keySet().forEach((npc) -> {
-            NBTTagCompound memorableNBT = new NBTTagCompound();
+            CompoundTag memorableNBT = new CompoundTag();
             memorableNBT.setString("NPC", npc.toString());
             NBTTagList actionList = new NBTTagList();
             for (Action action : memorableActions.get(npc)) {
-                NBTTagCompound actionNBT = new NBTTagCompound();
+                CompoundTag actionNBT = new CompoundTag();
                 actionNBT.setString("Type", action.getType());
                 actionNBT.setTag("Data", action.serializeNBT());
                 actionList.appendTag(actionNBT);
@@ -170,7 +171,7 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
         //Save the custom data
         NBTTagList memorableDataList = new NBTTagList();
         customNPCs.keySet().forEach(npc -> {
-            NBTTagCompound data = new NBTTagCompound();
+            CompoundTag data = new CompoundTag();
             data.setString("NPC", npc.toString());
             data.setString("Base", customNPCs.get(npc).getLeft().toString());
             data.setTag("Data", customNPCs.get(npc).getRight());

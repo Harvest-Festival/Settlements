@@ -6,6 +6,7 @@ import com.google.common.collect.HashMultimap;
 import com.google.common.collect.Lists;
 import com.google.common.collect.Multimap;
 import net.minecraft.core.BlockPos;
+import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
@@ -14,6 +15,7 @@ import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
 import net.minecraft.world.level.Level;
+import net.minecraft.world.level.block.Rotation;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.apache.commons.lang3.tuple.Pair;
@@ -33,6 +35,7 @@ import java.util.List;
 import java.util.Map;
 import java.util.concurrent.ExecutionException;
 
+import static uk.joshiejack.settlements.world.level.town.land.Interaction.FOOTPRINT;
 import static uk.joshiejack.settlements.world.town.land.Interaction.FOOTPRINT;
 
 public class LandRegistry implements INBTSerializable<CompoundTag> {
@@ -97,7 +100,7 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
     }
 
     @Nonnull
-    public TownBuilding getClosestBuilding(World world, BlockPos target) {
+    public TownBuilding getClosestBuilding(Level world, BlockPos target) {
         try {
             return closest.get(target, () -> {
                 TownBuilding closest = TownBuilding.NULL;
@@ -105,7 +108,7 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
                 for (TownBuilding location : buildings.values()) {
                     //BlockPos buildingPos = location.getCentre();
                     for (BlockPos buildingPos : location.getFootprint(world, FOOTPRINT)) {
-                        double between = target.getDistance(buildingPos.getX(), buildingPos.getY(), buildingPos.getZ());
+                        double between = target.distToCenterSqr(buildingPos.getX(), buildingPos.getY(), buildingPos.getZ());
                         if (between < distance) {
                             closest = location;
                             distance = between;
@@ -142,7 +145,7 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public void deserializeNBT(NBTTagCompound tag) {
+    public void deserializeNBT(CompoundTag tag) {
         NBTTagList list = tag.getTagList("Buildings", 10);
         for (int i = 0; i < list.tagCount(); i++) {
             NBTTagCompound nbt = list.getCompoundTagAt(i);

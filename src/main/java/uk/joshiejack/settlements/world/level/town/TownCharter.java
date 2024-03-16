@@ -1,23 +1,25 @@
 package uk.joshiejack.settlements.world.level.town;
 
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.UsernameCache;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import uk.joshiejack.penguinlib.util.helper.TimeHelper;
 
 import javax.annotation.Nonnull;
 import javax.annotation.Nullable;
+import java.util.Objects;
 import java.util.UUID;
 
 /*Information about the town*/
 public class TownCharter implements INBTSerializable<CompoundTag> {
-    private String name;
+    private Component name;
     private long founded;
-    private String founder;
+    private Component founder;
     private UUID teamUUID;
-    private String mayor;
+    private Component mayor;
 
-    public void setFoundingInformation(String name, String founder, long founded, UUID id) {
+    public void setFoundingInformation(Component name, Component founder, long founded, UUID id) {
         this.name = name;
         this.founder = founder;
         this.founded = founded;
@@ -25,11 +27,11 @@ public class TownCharter implements INBTSerializable<CompoundTag> {
         this.mayor = founder;
     }
 
-    public String getName() {
+    public Component getName() {
         return name;
     }
 
-    public void setName(String name) {
+    public void setName(Component name) {
         this.name = name;
     }
 
@@ -54,7 +56,7 @@ public class TownCharter implements INBTSerializable<CompoundTag> {
     public void setMayor(UUID mayor) {
         if (mayor == null) {
             this.mayor = null;
-        } else this.mayor = UsernameCache.getLastKnownUsername(mayor);
+        } else this.mayor = Component.literal(Objects.requireNonNull(UsernameCache.getLastKnownUsername(mayor)));
     }
 
     public boolean hasMayor() {
@@ -62,9 +64,9 @@ public class TownCharter implements INBTSerializable<CompoundTag> {
     }
 
     @Nonnull
-    public String getMayor() {
-        return hasMayor() ? mayor : "Unclaimed";
-    }
+    public Component getMayor() {
+        return hasMayor() ? mayor : Component.literal("Unclaimed");
+    } //TODO: TRANSLATE
 
     public int getAge(long time) {
         int created = TimeHelper.getElapsedDays(founded);
