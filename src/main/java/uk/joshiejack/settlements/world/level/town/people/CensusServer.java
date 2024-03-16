@@ -5,10 +5,13 @@ import com.google.common.collect.Maps;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
 import net.minecraft.nbt.NBTTagString;
+import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.world.World;
 import net.minecraft.world.level.Level;
@@ -24,7 +27,10 @@ import uk.joshiejack.settlements.network.town.people.PacketSyncResidents;
 import uk.joshiejack.settlements.npcs.NPC;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
+import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
+import uk.joshiejack.settlements.world.entity.npc.NPCInfo;
+import uk.joshiejack.settlements.world.level.TownSavedData;
 import uk.joshiejack.settlements.world.level.town.TownServer;
 import uk.joshiejack.settlements.world.town.TownServer;
 
@@ -37,7 +43,7 @@ import java.util.stream.Collectors;
 public class CensusServer extends AbstractCensus implements INBTSerializable<CompoundTag> {
     private final Set<ResourceLocation> inviteList = Sets.newHashSet(); //SUB_SET of Residents SERVER ONLY
     private final Multimap<ResourceLocation, Action> memorableActions = HashMultimap.create(); //SERVER ONLY
-    private final Map<ResourceLocation, Pair<ResourceLocation, CompoundTag>> customNPCs = Maps.newHashMap();
+    private final Map<ResourceLocation, DynamicNPC> customNPCs = Maps.newHashMap();
     private final Spawner spawner;
     private final TownServer town;
 
@@ -50,24 +56,19 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
         return spawner;
     }
 
-    public Collection<? extends Spawner.Worker> getWorkers() {
-        return customNPCs.values().stream().map(Spawner.TempWorker::new).collect(Collectors.toList());
-    }
-
     public Collection<ResourceLocation> getCustomNPCKeys() {
         return customNPCs.keySet();
     }
 
-    public Collection<Pair<ResourceLocation, CompoundTag>> getCustomNPCs() {
+    public Collection<DynamicNPC> getCustomNPCs() {
         return customNPCs.values();
     }
 
-    public void createCustomNPCFromData(Level world, ResourceLocation uniqueID, NPC baseNPC, CompoundTag data) {
-        if (!data.hasKey("UniqueID")) data.setString("UniqueID", uniqueID.toString());
-        customNPCs.put(uniqueID, Pair.of(baseNPC.getRegistryName(), data));
+    public void createCustomNPCFromData(Level world, ResourceLocation uniqueID, DynamicNPC npc) {
+        customNPCs.put(uniqueID, npc);
         onNPCsChanged(world);
-        AdventureDataLoader.get(world).markDirty();
-        PenguinNetwork.sendToEveryone(new PacketSyncCustomNPCs(world.provider.getDimension(), town.getID(), customNPCs.values()));
+        TownSavedData.get((ServerLevel) world).setDirty();
+        PenguinNetwork.sendToEveryone(new PacketSyncCustomNPCs(world.dimension(), town.getID(), customNPCs.values()));
     }
 
     public void invite(ResourceLocation npc) {
@@ -81,8 +82,9 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
                 CompoundTag theData = customNPCs.containsKey(uniqueID) ? customNPCs.get(uniqueID).getRight() : null;
                 NPCMob npcEntity = spawner.getNPC(world, theNPC, uniqueID, theData, town.getCentre());
                 if (npcEntity != null) {
-                    npcEntity.getPhysicalAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(Action::isPhysical).collect(Collectors.toCollection(LinkedList::new)));
-                    npcEntity.getMentalAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(a -> !a.isPhysical()).collect(Collectors.toCollection(LinkedList::new)));
+                    npcEntity.getPhysicalAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(a -> a.getAIType() == Action.AIType.PHYSICAL).collect(Collectors.toCollection(LinkedList::new)));
+                    npcEntity.getMentalAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(a -> a.getAIType() == Action.AIType.MENTAL).collect(Collectors.toCollection(LinkedList::new)));
+                    npcEntity.getLookAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(a -> a.getAIType() == Action.AIType.LOOK).collect(Collectors.toCollection(LinkedList::new)));
                     memorableActions.removeAll(uniqueID); //Clear
                 }
             }
@@ -105,7 +107,7 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
         invitableList.clear();
         invitableList.addAll(residents);
         invitableList.addAll(customNPCs.keySet());
-        spawner.getNearbyNPCs(world).forEach(e -> invitableList.remove(e.getInfo().getRegistryName()));
+        spawner.getNearbyNPCs(world).forEach(e -> invitableList.remove(e.getNPC().id()));
         invitableList.removeAll(inviteList); //If they are already invited remove them
         if (!original.equals(invitableList)) {
             PenguinNetwork.sendToTeam(new PacketSyncResidents(town.getID(), invitableList), world, town.getCharter().getTeamID());
@@ -115,70 +117,66 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
     @Override
     public void deserializeNBT(CompoundTag tag) {
         residents.clear(); //Updo
-        NBTTagList inviteTagList = tag.getTagList("InviteList", 8);
-        for (int i = 0; i < inviteTagList.tagCount(); i++) {
-            inviteList.add(new ResourceLocation(inviteTagList.getStringTagAt(i)));
+        ListTag inviteTagList = tag.getList("InviteList", 8);
+        for (int i = 0; i < inviteTagList.size(); i++) {
+            inviteList.add(new ResourceLocation(inviteTagList.getString(i)));
         }
         //Action memory
         memorableActions.clear(); //Empty
-        NBTTagList memorableList = tag.getTagList("MemorableList", 10);
-        for (int i = 0; i < memorableList.tagCount(); i++) {
-            CompoundTag memorableNBT = memorableList.getCompoundTagAt(i);
+        ListTag memorableList = tag.getList("MemorableList", 10);
+        for (int i = 0; i < memorableList.size(); i++) {
+            CompoundTag memorableNBT = memorableList.getCompound(i);
             ResourceLocation npc = new ResourceLocation(memorableNBT.getString("NPC"));
-            NBTTagList actionList = memorableNBT.getTagList("Actions", 10);
-            for (int j = 0; j < actionList.tagCount(); j++) {
-                CompoundTag actionNBT = actionList.getCompoundTagAt(j);
-                Action action = Action.createOfType(actionNBT.getString("Type"));
-                action.deserializeNBT(actionNBT.getCompoundTag("Data"));
+            ListTag actionList = memorableNBT.getList("Actions", 10);
+            for (int j = 0; j < actionList.size(); j++) {
+                CompoundTag actionNBT = actionList.getCompound(j);
+                Action action = Action.createOfType(actionNBT.getString("Type"), actionNBT.getCompound("Data"));
                 memorableActions.get(npc).add(action);
             }
         }
 
-        NBTTagList memorableDataList = tag.getTagList("CustomData", 10);
-        for (int i = 0; i < memorableDataList.tagCount(); i++) {
-            CompoundTag data = memorableDataList.getCompoundTagAt(i);
-            ResourceLocation npc = new ResourceLocation(data.getString("NPC"));
-            ResourceLocation base = new ResourceLocation(data.getString("Base"));
-            customNPCs.put(npc, Pair.of(base, data.getCompoundTag("Data")));
+        ListTag memorableDataList = tag.getList("CustomNPCs", 10);
+        for (int i = 0; i < memorableDataList.size(); i++) {
+            CompoundTag data = memorableDataList.getCompound(i);
+            DynamicNPC npc = DynamicNPC.fromTag(data.getCompound("Data"));
+            customNPCs.put(npc.id(), npc);
         }
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        NBTTagList inviteTagList = new NBTTagList();
-        inviteList.forEach(npc -> inviteTagList.appendTag(new NBTTagString(npc.toString())));
-        tag.setTag("InviteList", inviteTagList);
+        ListTag inviteTagList = new ListTag();
+        inviteList.forEach(npc -> inviteTagList.add(StringTag.valueOf(npc.toString())));
+        tag.put("InviteList", inviteTagList);
         //Action memory
-        NBTTagList memorableList = new NBTTagList();
+        ListTag memorableList = new ListTag();
         memorableActions.keySet().forEach((npc) -> {
             CompoundTag memorableNBT = new CompoundTag();
-            memorableNBT.setString("NPC", npc.toString());
-            NBTTagList actionList = new NBTTagList();
+            memorableNBT.putString("NPC", npc.toString());
+            ListTag actionList = new ListTag();
             for (Action action : memorableActions.get(npc)) {
                 CompoundTag actionNBT = new CompoundTag();
-                actionNBT.setString("Type", action.getType());
-                actionNBT.setTag("Data", action.serializeNBT());
-                actionList.appendTag(actionNBT);
+                actionNBT.putString("Type", action.getType());
+                actionNBT.put("Data", action.serializeNBT());
+                actionList.add(actionNBT);
             }
 
-            memorableNBT.setTag("Actions", actionList);
-            memorableList.appendTag(memorableNBT);
+            memorableNBT.put("Actions", actionList);
+            memorableList.add(memorableNBT);
         });
 
-        tag.setTag("MemorableList", memorableList);
+        tag.put("MemorableList", memorableList);
 
         //Save the custom data
-        NBTTagList memorableDataList = new NBTTagList();
+        ListTag memorableDataList = new ListTag();
         customNPCs.keySet().forEach(npc -> {
             CompoundTag data = new CompoundTag();
-            data.setString("NPC", npc.toString());
-            data.setString("Base", customNPCs.get(npc).getLeft().toString());
-            data.setTag("Data", customNPCs.get(npc).getRight());
-            memorableDataList.appendTag(data);
+            data.put("NPC", customNPCs.get(npc).toTag());
+            memorableDataList.add(data);
         });
 
-        tag.setTag("CustomData", memorableDataList);
+        tag.put("CustomNPCs", memorableDataList);
         return tag;
     }
 }

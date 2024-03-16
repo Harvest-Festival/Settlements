@@ -7,7 +7,7 @@ import net.minecraft.world.item.ItemStack;
 
 import javax.annotation.Nullable;
 
-public interface NPCInfo extends DisplayData, Worker {
+public interface NPCInfo extends DisplayData {
     @Nullable
     ResourceLocation getSkin();
     int getOutsideColor();
@@ -17,6 +17,8 @@ public interface NPCInfo extends DisplayData, Worker {
     String substring(String name);
     int getData(String name);
     void callScript(String function, Object... params);
+
+    String getOccupation();
 
     @Nullable
     default ResourceLocation getLootTable() {

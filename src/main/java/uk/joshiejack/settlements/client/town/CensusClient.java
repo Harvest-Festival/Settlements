@@ -2,6 +2,7 @@ package uk.joshiejack.settlements.client.town;
 
 import com.google.common.collect.Sets;
 import net.minecraft.resources.ResourceLocation;
+import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
 import uk.joshiejack.settlements.world.level.town.people.AbstractCensus;
 
 import java.util.Collection;
@@ -9,7 +10,7 @@ import java.util.Set;
 import java.util.stream.Collectors;
 
 public class CensusClient extends AbstractCensus {
-    private final Set<CustomNPC> customNPCs = Sets.newHashSet();
+    private final Set<DynamicNPC> customNPCs = Sets.newHashSet();
 
     public boolean hasResident(ResourceLocation npc) {
         return residents.contains(npc);
@@ -20,17 +21,17 @@ public class CensusClient extends AbstractCensus {
         this.invitableList.addAll(invitableList);
     }
 
-    public void setCustomNPCs(Collection<CustomNPC> custom) {
+    public void setCustomNPCs(Collection<DynamicNPC> custom) {
         customNPCs.clear();
         customNPCs.addAll(custom);
     }
 
-    public Collection<CustomNPC> getCustomNPCs() {
+    public Collection<DynamicNPC> getCustomNPCs() {
         return customNPCs;
     }
 
     @Override
     public Collection<ResourceLocation> getCustomNPCKeys() {
-        return customNPCs.stream().map(CustomNPC::getRegistryName).collect(Collectors.toList());
+        return customNPCs.stream().map(DynamicNPC::id).collect(Collectors.toList());
     }
 }
