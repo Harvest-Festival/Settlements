@@ -16,21 +16,21 @@ import uk.joshiejack.penguinlib.network.packet.PenguinPacket;
 import uk.joshiejack.penguinlib.util.registry.Packet;
 import uk.joshiejack.settlements.client.WorldMap;
 import uk.joshiejack.settlements.client.town.TownClient;
-import uk.joshiejack.settlements.network.town.people.PacketRequestCustomNPCS;
+import uk.joshiejack.settlements.network.town.people.RequestCustomNPCsPacket;
 import uk.joshiejack.settlements.world.level.town.Town;
 
 import java.util.Collection;
 import java.util.Objects;
 
 @Packet(PacketFlow.CLIENTBOUND)
-public record PacketSyncTowns(ResourceKey<Level> dimension, Collection<Town<?>> towns) implements PenguinPacket {
+public record SyncTownsPacket(ResourceKey<Level> dimension, Collection<Town<?>> towns) implements PenguinPacket {
     public static final ResourceLocation ID = PenguinLib.prefix("sync_towns");
     @Override
     public @NotNull ResourceLocation id() {
         return ID;
     }
 
-    public PacketSyncTowns(FriendlyByteBuf buf) {
+    public SyncTownsPacket(FriendlyByteBuf buf) {
         this(buf.readResourceKey(Registries.DIMENSION), Lists.newArrayList());
         int count = buf.readInt();
         for (int i = 0; i < count; i++) {
@@ -54,6 +54,6 @@ public record PacketSyncTowns(ResourceKey<Level> dimension, Collection<Town<?>> 
     public void handle(Player player) {
         WorldMap.setTowns(dimension, towns);
         //Request the Custom NPCS from the server
-        PenguinNetwork.sendToServer(new PacketRequestCustomNPCS(dimension));
+        PenguinNetwork.sendToServer(new RequestCustomNPCsPacket(dimension));
     }
 }

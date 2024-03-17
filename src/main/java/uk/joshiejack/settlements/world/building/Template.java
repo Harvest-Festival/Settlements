@@ -11,7 +11,10 @@ import net.minecraft.world.entity.EntityType;
 import net.minecraft.world.level.block.state.BlockState;
 import org.jetbrains.annotations.Nullable;
 import uk.joshiejack.penguinlib.client.level.ghost.GhostStateGetter;
+import uk.joshiejack.settlements.world.entity.npc.NPC;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.Map;
 
 public record Template(BlockPos size, BlockPos offset, Map<BlockPos, BlockData> original) {
@@ -52,6 +55,11 @@ public record Template(BlockPos size, BlockPos offset, Map<BlockPos, BlockData> 
 //        //Converts the template data to a map of placeables
         //Temporary
         return original;
+    }
+
+    //TODO: Implement
+    public List<NPC> getResidents() {
+        return new ArrayList<>();
     }
 
 

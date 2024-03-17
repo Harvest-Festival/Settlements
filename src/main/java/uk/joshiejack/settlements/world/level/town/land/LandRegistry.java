@@ -8,8 +8,10 @@ import com.google.common.collect.Multimap;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.Rotations;
 import net.minecraft.nbt.CompoundTag;
+import net.minecraft.nbt.ListTag;
 import net.minecraft.nbt.NBTTagCompound;
 import net.minecraft.nbt.NBTTagList;
+import net.minecraft.resources.ResourceLocation;
 import net.minecraft.util.ResourceLocation;
 import net.minecraft.util.Rotation;
 import net.minecraft.util.math.BlockPos;
@@ -21,6 +23,7 @@ import net.neoforged.neoforge.common.util.INBTSerializable;
 import org.apache.commons.lang3.tuple.Pair;
 import uk.joshiejack.penguinlib.util.helpers.minecraft.BlockPosHelper;
 import uk.joshiejack.settlements.AdventureConfig;
+import uk.joshiejack.settlements.Settlements;
 import uk.joshiejack.settlements.building.Building;
 import uk.joshiejack.settlements.building.BuildingUpgrades;
 import uk.joshiejack.settlements.util.TownFinder;
@@ -126,7 +129,7 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
     public double getDistance(BlockPos pos) {
         double distance = Double.MAX_VALUE;
         for (TownBuilding building : buildings.values()) {
-            double placementDistance = building.getCentre().getDistance(pos.getX(), pos.getY(), pos.getZ());
+            double placementDistance = building.getCentre().distToCenterSqr(pos.getX(), pos.getY(), pos.getZ());
             if (placementDistance < AdventureConfig.townDistance && placementDistance < distance) {
                 distance = placementDistance;
             }
@@ -135,7 +138,7 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
         return distance;
     }
 
-    public List<BlockPos> getFootprints(World world, Interaction interaction) {
+    public List<BlockPos> getFootprints(Level world, Interaction interaction) {
         if (!footprint.containsKey(interaction)) {
             List<BlockPos> list = Lists.newArrayList();
             buildings.values().forEach(b -> list.addAll(b.getFootprint(world, interaction)));
@@ -146,14 +149,14 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        NBTTagList list = tag.getTagList("Buildings", 10);
-        for (int i = 0; i < list.tagCount(); i++) {
-            NBTTagCompound nbt = list.getCompoundTagAt(i);
-            Building building = Building.REGISTRY.get(new ResourceLocation(nbt.getString("Building")));
-            BlockPos pos = BlockPos.fromLong(nbt.getLong("Pos"));
+        ListTag list = tag.getList("Buildings", 10);
+        for (int i = 0; i < list.size(); i++) {
+            CompoundTag nbt = list.getCompound(i);
+            Building building = Settlements.Registries.BUILDINGS.get(new ResourceLocation(nbt.getString("Building")));
+            BlockPos pos = BlockPos.of(nbt.getLong("Pos"));
             Rotation rotation = Rotation.values()[nbt.getByte("Rotation")];
-            TownBuilding townBuilding = new TownBuilding(building, pos, rotation);
-            if (nbt.getBoolean("Built")) townBuilding.setBuilt();
+            boolean built = nbt.getBoolean("Built");
+            TownBuilding townBuilding = new TownBuilding(building, pos, rotation, built);
             buildings.get(building).add(townBuilding);
         }
 
@@ -161,19 +164,19 @@ public class LandRegistry implements INBTSerializable<CompoundTag> {
     }
 
     @Override
-    public NBTTagCompound serializeNBT() {
-        NBTTagCompound tag = new NBTTagCompound();
-        NBTTagList buildingList = new NBTTagList();
+    public CompoundTag serializeNBT() {
+        CompoundTag tag = new CompoundTag();
+        ListTag buildingList = new ListTag();
         buildings.values().forEach((b) -> {
-            NBTTagCompound nbt = new NBTTagCompound();
-            nbt.setString("Building", b.getBuilding().getRegistryName().toString());
-            nbt.setLong("Pos", b.getPosition().toLong());
-            nbt.setByte("Rotation", (byte) b.getRotation().ordinal());
-            nbt.setBoolean("Built", b.isBuilt());
-            buildingList.appendTag(nbt);
+            CompoundTag nbt = new CompoundTag();
+            nbt.putString("Building", b.getBuilding().id().toString());
+            nbt.putLong("Pos", b.getPosition().asLong());
+            nbt.putByte("Rotation", (byte) b.getRotation().ordinal());
+            nbt.putBoolean("Built", b.isBuilt());
+            buildingList.add(nbt);
         });
 
-        tag.setTag("Buildings", buildingList);
+        tag.put("Buildings", buildingList);
         return tag;
     }
 }

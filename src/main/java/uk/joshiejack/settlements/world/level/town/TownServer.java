@@ -2,12 +2,8 @@ package uk.joshiejack.settlements.world.level.town;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraft.world.World;
 import net.minecraft.world.level.Level;
 import uk.joshiejack.settlements.world.level.town.people.CensusServer;
-import uk.joshiejack.settlements.world.town.people.CensusServer;
 
 public class TownServer extends Town<CensusServer> {
     public static final TownServer NULL = new TownServer(0, BlockPos.ZERO);

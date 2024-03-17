@@ -1,14 +1,9 @@
 package uk.joshiejack.settlements.world.level;
 
-import com.google.common.cache.Cache;
-import com.google.common.cache.CacheBuilder;
-import com.google.common.collect.Lists;
-import com.google.common.collect.Maps;
 import it.unimi.dsi.fastutil.ints.Int2ObjectMap;
 import it.unimi.dsi.fastutil.ints.Int2ObjectOpenHashMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectMap;
 import it.unimi.dsi.fastutil.objects.Object2ObjectOpenHashMap;
-import net.minecraft.core.BlockPos;
 import net.minecraft.entity.player.EntityPlayer;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
@@ -23,7 +18,6 @@ import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.saveddata.SavedData;
 import net.minecraft.world.storage.WorldSavedData;
-import org.apache.commons.lang3.tuple.Pair;
 import org.jetbrains.annotations.NotNull;
 import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.penguinlib.scripting.Scripting;
@@ -33,8 +27,8 @@ import uk.joshiejack.penguinlib.util.helpers.minecraft.TimeHelper;
 import uk.joshiejack.penguinlib.world.team.PenguinTeams;
 import uk.joshiejack.penguinlib.world.teams.PenguinTeams;
 import uk.joshiejack.settlements.network.block.PacketSyncDailies;
-import uk.joshiejack.settlements.network.town.PacketSyncTowns;
-import uk.joshiejack.settlements.network.town.land.PacketCreateTown;
+import uk.joshiejack.settlements.network.town.SyncTownsPacket;
+import uk.joshiejack.settlements.network.town.land.CreateTownPacket;
 import uk.joshiejack.settlements.npcs.status.StatusTracker;
 import uk.joshiejack.settlements.quest.Quest;
 import uk.joshiejack.settlements.quest.data.QuestData;
@@ -50,7 +44,6 @@ import uk.joshiejack.settlements.world.town.TownServer;
 
 import javax.annotation.Nonnull;
 import java.util.*;
-import java.util.stream.Collectors;
 
 
 public class TownSavedData extends SavedData {
@@ -94,7 +87,7 @@ public class TownSavedData extends SavedData {
         getTownMap(world.dimension()).put(town.getID(), town);
         TownSavedData.get((ServerLevel) world).setDirty(); //Save me bitch!
         TownFinder.getFinder(world).clearCache(); //Clear the cache for the town finder
-        PenguinNetwork.sendToEveryone(new PacketCreateTown(world.provider.getDimension(), town));
+        PenguinNetwork.sendToEveryone(new CreateTownPacket(world.provider.getDimension(), town));
         return town;
     }
 
@@ -155,7 +148,7 @@ public class TownSavedData extends SavedData {
 
     public void sync(Player player) {
         towns.forEach((i, map) -> {
-            PenguinNetwork.sendToClient(new PacketSyncTowns(i, getTownMap(i).values()), player);
+            PenguinNetwork.sendToClient(new SyncTownsPacket(i, getTownMap(i).values()), player);
         });
     }
 }

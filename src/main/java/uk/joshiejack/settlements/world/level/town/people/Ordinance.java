@@ -1,6 +1,6 @@
 package uk.joshiejack.settlements.world.level.town.people;
 
-import uk.joshiejack.penguinlib.util.helpers.generic.StringHelper;
+import net.minecraft.network.chat.Component;
 import uk.joshiejack.settlements.Settlements;
 
 import java.util.Locale;
@@ -20,16 +20,16 @@ public enum Ordinance {
         this.enabled = enabled;
     }
 
-    public String getName() {
-        return StringHelper.localize(Settlements.MODID + ".ordinance." + name().toLowerCase(Locale.ENGLISH) + ".name");
+    public Component getName() {
+        return Component.translatable(Settlements.MODID + ".ordinance." + name().toLowerCase(Locale.ENGLISH) + ".name");
     }
 
-    public String getDescription() {
-        return StringHelper.localize(Settlements.MODID + ".ordinance." + name().toLowerCase(Locale.ENGLISH) + ".description");
+    public Component getDescription() {
+        return Component.translatable(Settlements.MODID + ".ordinance." + name().toLowerCase(Locale.ENGLISH) + ".description");
     }
 
-    public String getTooltip() {
-        return StringHelper.localize(Settlements.MODID + ".ordinance." + name().toLowerCase(Locale.ENGLISH) + ".tooltip");
+    public Component getTooltip() {
+        return Component.translatable(Settlements.MODID + ".ordinance." + name().toLowerCase(Locale.ENGLISH) + ".tooltip");
     }
 
     public boolean isEnabledByDefault() {

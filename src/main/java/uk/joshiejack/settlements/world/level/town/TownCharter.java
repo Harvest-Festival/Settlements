@@ -45,11 +45,11 @@ public class TownCharter implements INBTSerializable<CompoundTag> {
     }
 
     @Nullable
-    public String getFounder() {
+    public Component getFounder() {
         return founder;
     }
 
-    public void setMayorString(String mayor) {
+    public void setMayorString(Component mayor) {
         this.mayor = mayor;
     }
 

@@ -3,11 +3,8 @@ package uk.joshiejack.settlements.world.level.town.people;
 import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import net.minecraft.resources.ResourceLocation;
-import net.minecraft.util.ResourceLocation;
-import uk.joshiejack.settlements.building.Building;
 import uk.joshiejack.settlements.world.building.Building;
 import uk.joshiejack.settlements.world.level.town.land.TownBuilding;
-import uk.joshiejack.settlements.world.town.land.TownBuilding;
 
 import java.util.Collection;
 import java.util.Set;
@@ -27,7 +24,7 @@ public abstract class AbstractCensus {
     public void onBuildingsChanged(Multimap<Building, TownBuilding> buildings) {
         residents.clear();
         for (Building building : buildings.keySet()) {
-            building.getResidents().forEach(npc -> residents.add(npc.getRegistryName()));
+            building.template().getResidents().forEach(npc -> residents.add(npc.id()));
         }
     }
 

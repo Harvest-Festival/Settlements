@@ -38,7 +38,7 @@ import java.util.Set;
 import java.util.concurrent.ExecutionException;
 
 public class TownBuilding {
-    public static final TownBuilding NULL = new TownBuilding(Settlements.Registries.BUILDINGS.emptyEntry(), BlockPos.ZERO, Rotation.NONE);
+    public static final TownBuilding NULL = new TownBuilding(Settlements.Registries.BUILDINGS.emptyEntry(), BlockPos.ZERO, Rotation.NONE, false);
     private static final List<BlockPos> EMPTY = Lists.newArrayList();
     private final Cache<BlockState, List<BlockPos>> posByType = CacheBuilder.newBuilder().build();
     private final Cache<String, List<BlockPos>> posByWaypoint = CacheBuilder.newBuilder().build();
@@ -48,11 +48,11 @@ public class TownBuilding {
     private final Rotation rotation;
     private boolean built;
 
-    public TownBuilding(Building building, BlockPos pos, Rotation rotation) {
+    public TownBuilding(Building building, BlockPos pos, Rotation rotation, boolean built) {
         this.building = building;
         this.pos = pos;
         this.rotation = rotation;
-        this.built = false;
+        this.built = built;
     }
 
     public void newDay(Level world, Town<?> town) {

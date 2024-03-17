@@ -19,14 +19,14 @@ import java.util.Collection;
 import java.util.Objects;
 
 @Packet(PacketFlow.CLIENTBOUND)
-public record PacketSyncCustomNPCs(ResourceKey<Level> dimension, int town, Collection<DynamicNPC> custom) implements PenguinPacket {
+public record SyncCustomNPCsPacket(ResourceKey<Level> dimension, int town, Collection<DynamicNPC> custom) implements PenguinPacket {
     public static final ResourceLocation ID = PenguinLib.prefix("sync_custom_npcs");
     @Override
     public @NotNull ResourceLocation id() {
         return ID;
     }
 
-    public PacketSyncCustomNPCs(FriendlyByteBuf buf) {
+    public SyncCustomNPCsPacket(FriendlyByteBuf buf) {
         this(buf.readResourceKey(Registries.DIMENSION), buf.readInt(),
                 buf.readList((buffer) -> DynamicNPC.fromTag(Objects.requireNonNull(buffer.readNbt()))));
 

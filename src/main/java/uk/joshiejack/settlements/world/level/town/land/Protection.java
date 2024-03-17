@@ -10,6 +10,7 @@ import net.minecraft.tags.BlockTags;
 import net.minecraft.tags.TagKey;
 import net.minecraft.util.math.BlockPos;
 import net.minecraft.world.World;
+import net.minecraft.world.entity.decoration.ItemFrame;
 import net.minecraft.world.entity.player.Player;
 import net.minecraft.world.level.Level;
 import net.minecraft.world.level.block.Block;
@@ -22,20 +23,27 @@ import net.minecraftforge.fml.common.Mod;
 import net.minecraftforge.fml.common.eventhandler.Event;
 import net.minecraftforge.fml.common.eventhandler.EventPriority;
 import net.minecraftforge.fml.common.eventhandler.SubscribeEvent;
+import net.neoforged.bus.api.Event;
 import net.neoforged.bus.api.EventPriority;
 import net.neoforged.bus.api.SubscribeEvent;
 import net.neoforged.fml.common.Mod;
 import net.neoforged.neoforge.event.entity.player.PlayerEvent;
+import net.neoforged.neoforge.event.entity.player.PlayerInteractEvent;
+import net.neoforged.neoforge.event.level.BlockEvent;
+import net.neoforged.neoforge.event.level.ExplosionEvent;
+import uk.joshiejack.penguinlib.world.team.PenguinTeams;
 import uk.joshiejack.penguinlib.world.teams.PenguinTeams;
 import uk.joshiejack.settlements.Settlements;
 import uk.joshiejack.settlements.util.TownFinder;
 import uk.joshiejack.settlements.world.level.town.Town;
+import uk.joshiejack.settlements.world.level.town.TownFinder;
 import uk.joshiejack.settlements.world.level.town.people.Ordinance;
 import uk.joshiejack.settlements.world.town.Town;
 import uk.joshiejack.settlements.world.town.people.Ordinance;
 
 import javax.annotation.Nullable;
 import java.util.List;
+import java.util.Objects;
 import java.util.Set;
 
 @Mod.EventBusSubscriber(modid = Settlements.MODID)
@@ -51,40 +59,40 @@ public class Protection {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onDetonate(ExplosionEvent.Detonate event) {
-        if (event.getAffectedBlocks().size() > 0) {
-            BlockPos origin = new BlockPos(event.getExplosion().getPosition());
-            Town<?> town = TownFinder.find(event.getWorld(), origin);
+        if (!event.getAffectedBlocks().isEmpty()) {
+            BlockPos origin = new BlockPos(Objects.requireNonNull(event.getExplosion().getDirectSourceEntity()).blockPosition());
+            Town<?> town = TownFinder.find(event.getLevel(), origin);
             if (town.getGovernment().hasLaw(Ordinance.INTERNAL_PROTECTION)) {
-                List<BlockPos> footprints = town.getLandRegistry().getFootprints(event.getWorld(), Interaction.FOOTPRINT);
+                List<BlockPos> footprints = town.getLandRegistry().getFootprints(event.getLevel(), Interaction.FOOTPRINT);
                 event.getAffectedBlocks().removeAll(footprints);
-                event.getAffectedEntities().removeIf(e -> footprints.contains(e.getPosition()));
+                event.getAffectedEntities().removeIf(e -> footprints.contains(e.blockPosition()));
             }
 
             if (town.getGovernment().hasLaw(Ordinance.EXTERNAL_PROTECTION)) {
-                event.getAffectedBlocks().removeIf(pos -> TownFinder.find(event.getWorld(), pos) == town);
-                event.getAffectedEntities().removeIf(entity -> TownFinder.find(event.getWorld(), entity.getPosition()) == town);
+                event.getAffectedBlocks().removeIf(pos -> TownFinder.find(event.getLevel(), pos) == town);
+                event.getAffectedEntities().removeIf(entity -> TownFinder.find(event.getLevel(), entity.getPosition()) == town);
             }
         }
     }
 
-    @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onHarvestBlock(BlockEvent.HarvestDropsEvent event) {
-        if (isProtected(event.getHarvester(), event.getWorld(), event.getPos(), Interaction.BREAK, Ordinance.EXTERNAL_PROTECTION)) {
-            event.getDrops().clear();
-        }
-    }
+//    @SubscribeEvent(priority = EventPriority.LOWEST) //TOD: Fix this
+//    public static void onHarvestBlock(BlockEvent.HarvestDropsEvent event) {
+//        if (isProtected(event.getHarvester(), event.getWorld(), event.getPos(), Interaction.BREAK, Ordinance.EXTERNAL_PROTECTION)) {
+//            event.getDrops().clear();
+//        }
+//    }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onBreakBlock(BlockEvent.BreakEvent event) {
-        if (isProtected(event.getPlayer(), event.getWorld(), event.getPos(), Interaction.BREAK, Ordinance.EXTERNAL_PROTECTION)) {
+        if (isProtected(event.getPlayer(), event.getPlayer().level(), event.getPos(), Interaction.BREAK, Ordinance.EXTERNAL_PROTECTION)) {
             event.setCanceled(true);
         }
     }
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onEntityInteract(PlayerInteractEvent.EntityInteract event) {
-        if (event.getTarget() instanceof EntityItemFrame) {
-            if (isProtected(event.getEntityPlayer(), event.getWorld(), event.getPos(), Interaction.ENTITY_INTERACT, Ordinance.BAN_COMMUNICATION)) {
+        if (event.getTarget() instanceof ItemFrame) {
+            if (isProtected(event.getEntity(), event.getLevel(), event.getPos(), Interaction.ENTITY_INTERACT, Ordinance.BAN_COMMUNICATION)) {
                 event.setCanceled(true);
             }
         }
@@ -92,15 +100,15 @@ public class Protection {
 
     @SubscribeEvent(priority = EventPriority.LOWEST)
     public static void onActivate(PlayerInteractEvent.RightClickBlock event) {
-        if (isProtected(event.getEntityPlayer(), event.getWorld(), event.getPos(), Interaction.RIGHT_CLICK, Ordinance.BAN_INTERACTION)) {
+        if (isProtected(event.getEntity(), event.getLevel(), event.getPos(), Interaction.RIGHT_CLICK, Ordinance.BAN_INTERACTION)) {
             event.setUseBlock(Event.Result.DENY);
         }
     }
 
     @SuppressWarnings("deprecation")
     @SubscribeEvent(priority = EventPriority.LOWEST)
-    public static void onPlaced(BlockEvent.PlaceEvent event) {
-        if (isProtected(event.getPlayer(), event.getWorld(), event.getPos(), Interaction.RIGHT_CLICK, Ordinance.BAN_CONSTRUCTION)) {
+    public static void onPlaced(BlockEvent.EntityPlaceEvent event) {
+        if (event.getEntity() instanceof Player player && isProtected(player, player.level(), event.getPos(), Interaction.RIGHT_CLICK, Ordinance.BAN_CONSTRUCTION)) {
             event.setCanceled(true);
         }
     }

@@ -17,21 +17,21 @@ import net.minecraft.world.World;
 import net.minecraft.world.level.Level;
 import net.minecraftforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import org.apache.commons.lang3.tuple.Pair;
 import uk.joshiejack.penguinlib.network.PenguinNetwork;
 import uk.joshiejack.settlements.AdventureDataLoader;
 import uk.joshiejack.settlements.entity.EntityNPC;
 import uk.joshiejack.settlements.entity.ai.action.Action;
-import uk.joshiejack.settlements.network.town.people.PacketSyncCustomNPCs;
-import uk.joshiejack.settlements.network.town.people.PacketSyncResidents;
+import uk.joshiejack.settlements.network.town.people.SyncCustomNPCsPacket;
+import uk.joshiejack.settlements.network.town.people.SyncInvitableSetPacket;
 import uk.joshiejack.settlements.npcs.NPC;
+import uk.joshiejack.settlements.world.building.Building;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
 import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
-import uk.joshiejack.settlements.world.entity.npc.NPCInfo;
 import uk.joshiejack.settlements.world.level.TownSavedData;
 import uk.joshiejack.settlements.world.level.town.TownServer;
+import uk.joshiejack.settlements.world.level.town.land.TownBuilding;
 import uk.joshiejack.settlements.world.town.TownServer;
 
 import java.util.Collection;
@@ -68,7 +68,7 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
         customNPCs.put(uniqueID, npc);
         onNPCsChanged(world);
         TownSavedData.get((ServerLevel) world).setDirty();
-        PenguinNetwork.sendToEveryone(new PacketSyncCustomNPCs(world.dimension(), town.getID(), customNPCs.values()));
+        PenguinNetwork.sendToEveryone(new SyncCustomNPCsPacket(world.dimension(), town.getID(), customNPCs.values()));
     }
 
     public void invite(ResourceLocation npc) {
@@ -110,7 +110,7 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
         spawner.getNearbyNPCs(world).forEach(e -> invitableList.remove(e.getNPC().id()));
         invitableList.removeAll(inviteList); //If they are already invited remove them
         if (!original.equals(invitableList)) {
-            PenguinNetwork.sendToTeam(new PacketSyncResidents(town.getID(), invitableList), world, town.getCharter().getTeamID());
+            PenguinNetwork.sendToTeam((ServerLevel) world, town.getCharter().getTeamID(), new SyncInvitableSetPacket(world.dimension(), town.getID(), invitableList));
         }
     }
 
