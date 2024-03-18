@@ -2,17 +2,10 @@ package uk.joshiejack.settlements.world.level.town;
 
 import net.minecraft.core.BlockPos;
 import net.minecraft.nbt.CompoundTag;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.util.math.BlockPos;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.common.util.INBTSerializable;
-import uk.joshiejack.harvestcore.HCConfig;
 import uk.joshiejack.settlements.world.level.town.land.LandRegistry;
 import uk.joshiejack.settlements.world.level.town.people.AbstractCensus;
 import uk.joshiejack.settlements.world.level.town.people.Government;
-import uk.joshiejack.settlements.world.town.land.LandRegistry;
-import uk.joshiejack.settlements.world.town.people.AbstractCensus;
-import uk.joshiejack.settlements.world.town.people.Government;
 
 import java.util.Objects;
 
@@ -90,7 +83,8 @@ public abstract class Town<C extends AbstractCensus> implements INBTSerializable
         return Objects.hash(id);
     }
 
-    public int getRadius() {
-        return HCConfig.maxWildernessDistance;
-    }
+    //TODO: ???
+//    public int getRadius() {
+//        return HCConfig.maxWildernessDistance;
+//    }
 }

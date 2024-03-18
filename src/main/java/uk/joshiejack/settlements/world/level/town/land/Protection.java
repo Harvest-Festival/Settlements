@@ -70,7 +70,7 @@ public class Protection {
 
             if (town.getGovernment().hasLaw(Ordinance.EXTERNAL_PROTECTION)) {
                 event.getAffectedBlocks().removeIf(pos -> TownFinder.find(event.getLevel(), pos) == town);
-                event.getAffectedEntities().removeIf(entity -> TownFinder.find(event.getLevel(), entity.getPosition()) == town);
+                event.getAffectedEntities().removeIf(entity -> TownFinder.find(event.getLevel(), entity.blockPosition()) == town);
             }
         }
     }

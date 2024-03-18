@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -36,8 +37,10 @@ public record RequestCitizenshipPacket(ResourceKey<Level> dimension, int townID)
 
     @Override
     public void handleServer(ServerPlayer player) {
-        TownSavedData data = TownSavedData.get(player.serverLevel());
-        Town<?> town = data.getTownByID(dimension, townID);
+        ServerLevel level = player.serverLevel().getServer().getLevel(dimension);
+        if (level == null) return; //If the level is null, then we can't do anything
+        TownSavedData data = TownSavedData.get(level);
+        Town<?> town = data.getTownByID(townID);
         if (town.getGovernment().getCitizenship() == Citizenship.APPLICATION) {
             town.getGovernment().addApplication(player.getUUID());
             PenguinNetwork.sendToTeam(player.serverLevel(), town.getCharter().getTeamID(), new SyncApplicationsPacket(dimension, townID, town.getGovernment().getApplications()));

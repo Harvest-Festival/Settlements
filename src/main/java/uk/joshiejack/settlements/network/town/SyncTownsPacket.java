@@ -1,6 +1,5 @@
 package uk.joshiejack.settlements.network.town;
 
-import com.google.common.collect.Lists;
 import net.minecraft.core.BlockPos;
 import net.minecraft.core.registries.Registries;
 import net.minecraft.network.FriendlyByteBuf;
@@ -19,6 +18,7 @@ import uk.joshiejack.settlements.client.town.TownClient;
 import uk.joshiejack.settlements.network.town.people.RequestCustomNPCsPacket;
 import uk.joshiejack.settlements.world.level.town.Town;
 
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Objects;
 
@@ -31,7 +31,7 @@ public record SyncTownsPacket(ResourceKey<Level> dimension, Collection<Town<?>> 
     }
 
     public SyncTownsPacket(FriendlyByteBuf buf) {
-        this(buf.readResourceKey(Registries.DIMENSION), Lists.newArrayList());
+        this(buf.readResourceKey(Registries.DIMENSION), new ArrayList<>());
         int count = buf.readInt();
         for (int i = 0; i < count; i++) {
             TownClient town = new TownClient(buf.readInt(), BlockPos.of(buf.readLong()));

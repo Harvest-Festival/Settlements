@@ -39,7 +39,7 @@ public record RequestCustomNPCsPacket(ResourceKey<Level> dimension) implements P
     public void handleServer(ServerPlayer player) {
         ServerLevel level = Objects.requireNonNull(player.getServer()).getLevel(dimension);
         if (level != null) {
-            for (TownServer town : TownSavedData.get(level).getTowns(level)) {
+            for (TownServer town : TownSavedData.get(level).getTowns()) {
                 PenguinNetwork.sendToClient(player, new SyncCustomNPCsPacket(dimension, town.getID(), town.getCensus().getCustomNPCs()));
             }
         }

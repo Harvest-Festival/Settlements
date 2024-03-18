@@ -4,6 +4,7 @@ import net.minecraft.nbt.CompoundTag;
 import net.minecraft.network.chat.Component;
 import net.neoforged.neoforge.common.UsernameCache;
 import net.neoforged.neoforge.common.util.INBTSerializable;
+import uk.joshiejack.penguinlib.util.helper.TagHelper;
 import uk.joshiejack.penguinlib.util.helper.TimeHelper;
 
 import javax.annotation.Nonnull;
@@ -76,21 +77,21 @@ public class TownCharter implements INBTSerializable<CompoundTag> {
 
     @Override
     public void deserializeNBT(CompoundTag tag) {
-        name = tag.getString("Name");
+        name = TagHelper.getComponent(tag, "Name");
         founded = tag.getLong("FoundingDate");
-        founder = tag.getString("Founder");
+        founder = TagHelper.getComponent(tag, "Founder");
         teamUUID = UUID.fromString(tag.getString("Team"));
-        mayor = tag.contains("Mayor") ? tag.getString("Mayor") : null;
+        mayor = tag.contains("Mayor") ? TagHelper.getComponent(tag, "Mayor") : null;
     }
 
     @Override
     public CompoundTag serializeNBT() {
         CompoundTag tag = new CompoundTag();
-        tag.putString("Name", name);
+        TagHelper.putComponent(tag, "Name", name);
         tag.putLong("FoundingDate", founded);
         tag.putString("Team", teamUUID.toString());
-        tag.putString("Founder", founder);
-        if (mayor != null) tag.putString("Mayor", mayor);
+        TagHelper.putComponent(tag, "Founder", founder);
+        if (mayor != null) TagHelper.putComponent(tag, "Mayor", mayor);
         return tag;
     }
 }

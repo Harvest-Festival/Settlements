@@ -145,7 +145,7 @@ public class TownBuilding {
         try {
             return posByWaypoint.get(waypoint, () -> {
                 Set<BlockPos> f = Sets.newHashSet();
-                for (Placeable placeable : building.getTemplate().getComponents()) {
+                for (Placeable placeable : building.template().getComponents()) {
                     if (placeable instanceof PlaceableWaypoint && ((PlaceableWaypoint) placeable).getName().startsWith(waypoint)) {
                         f.add(BlockPosHelper.getTransformedPosition(placeable.getOffsetPos(), pos, rotation));
                     }

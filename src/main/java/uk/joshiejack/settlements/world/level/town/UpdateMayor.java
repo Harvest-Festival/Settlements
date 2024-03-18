@@ -15,7 +15,7 @@ public class UpdateMayor {
     @SubscribeEvent
     public static void onTeamChangedOwner(TeamChangedOwnerEvent event) {
         for (ServerLevel world: ServerLifecycleHooks.getCurrentServer().getAllLevels()) {
-            TownSavedData.get(world).getTowns(world).stream().filter(town ->
+            TownSavedData.get(world).getTowns().stream().filter(town ->
                     town.getCharter().getTeamID().equals(event.getTeamUUID())).findFirst().ifPresent(t -> {
                         t.getCharter().setMayor(event.getNewOwner());
                         PenguinNetwork.sendToEveryone(new SyncMayorPacket(world.dimension(), t.getID(), t.getCharter().getMayor()));

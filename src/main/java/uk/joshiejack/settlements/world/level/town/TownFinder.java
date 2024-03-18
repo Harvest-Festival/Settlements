@@ -41,20 +41,20 @@ public class TownFinder {
 
     @SuppressWarnings("unchecked")
     public static <T extends Town<?>> T find(Level world, BlockPos pos) {
-        return (T) getFinder(world).find(world.isClientSide ? WorldMap.getTowns(world) : TownSavedData.get((ServerLevel) world).getTowns(world), pos, world.isClientSide ? TownClient.NULL : TownServer.NULL);
+        return (T) getFinder(world).find(world.isClientSide ? WorldMap.getTowns(world) : TownSavedData.get((ServerLevel) world).getTowns(), pos, world.isClientSide ? TownClient.NULL : TownServer.NULL);
     }
 
     public static Collection<? extends Town<?>> all(Level world) {
-        return world.isClientSide ? WorldMap.getTowns(world) : TownSavedData.get((ServerLevel) world).getTowns(world);
+        return world.isClientSide ? WorldMap.getTowns(world) : TownSavedData.get((ServerLevel) world).getTowns();
     }
 
     public static Town<?>[] towns(Level world) {
-        return TownSavedData.get((ServerLevel) world).getTowns(world).toArray(new Town[0]);
+        return TownSavedData.get((ServerLevel) world).getTowns().toArray(new Town[0]);
     }
 
     public TownServer findOrCreate(Player player, BlockPos pos) {
         TownSavedData data = TownSavedData.get((ServerLevel) player.level());
-        Collection<TownServer> towns = data.getTowns(player.level());
+        Collection<TownServer> towns = data.getTowns();
         Town<?> town = find(towns, pos, TownServer.NULL);
         if (town == TownServer.NULL) {
             town = data.createTown(player.level(), player);

@@ -6,33 +6,21 @@ import com.google.common.collect.Multimap;
 import com.google.common.collect.Sets;
 import net.minecraft.nbt.CompoundTag;
 import net.minecraft.nbt.ListTag;
-import net.minecraft.nbt.NBTTagCompound;
-import net.minecraft.nbt.NBTTagList;
-import net.minecraft.nbt.NBTTagString;
 import net.minecraft.nbt.StringTag;
 import net.minecraft.resources.ResourceLocation;
 import net.minecraft.server.level.ServerLevel;
-import net.minecraft.util.ResourceLocation;
-import net.minecraft.world.World;
 import net.minecraft.world.level.Level;
-import net.minecraftforge.common.util.INBTSerializable;
 import net.neoforged.neoforge.common.util.INBTSerializable;
 import uk.joshiejack.penguinlib.network.PenguinNetwork;
-import uk.joshiejack.settlements.AdventureDataLoader;
-import uk.joshiejack.settlements.entity.EntityNPC;
-import uk.joshiejack.settlements.entity.ai.action.Action;
 import uk.joshiejack.settlements.network.town.people.SyncCustomNPCsPacket;
 import uk.joshiejack.settlements.network.town.people.SyncInvitableSetPacket;
-import uk.joshiejack.settlements.npcs.NPC;
-import uk.joshiejack.settlements.world.building.Building;
 import uk.joshiejack.settlements.world.entity.NPCMob;
 import uk.joshiejack.settlements.world.entity.ai.action.Action;
 import uk.joshiejack.settlements.world.entity.npc.DynamicNPC;
 import uk.joshiejack.settlements.world.entity.npc.NPC;
+import uk.joshiejack.settlements.world.entity.npc.NPCInfo;
 import uk.joshiejack.settlements.world.level.TownSavedData;
 import uk.joshiejack.settlements.world.level.town.TownServer;
-import uk.joshiejack.settlements.world.level.town.land.TownBuilding;
-import uk.joshiejack.settlements.world.town.TownServer;
 
 import java.util.Collection;
 import java.util.LinkedList;
@@ -78,9 +66,8 @@ public class CensusServer extends AbstractCensus implements INBTSerializable<Com
     public void onNewDay(Level world) {
         if (!inviteList.isEmpty()) {
             for (ResourceLocation uniqueID : inviteList) {
-                NPC theNPC = customNPCs.containsKey(uniqueID) ? NPC.getNPCFromRegistry(customNPCs.get(uniqueID).getLeft()) : NPC.getNPCFromRegistry(uniqueID);
-                CompoundTag theData = customNPCs.containsKey(uniqueID) ? customNPCs.get(uniqueID).getRight() : null;
-                NPCMob npcEntity = spawner.getNPC(world, theNPC, uniqueID, theData, town.getCentre());
+                NPCInfo theNPC = customNPCs.containsKey(uniqueID) ? customNPCs.get(uniqueID) : NPC.getNPCFromRegistry(uniqueID);
+                NPCMob npcEntity = spawner.getNPC(world, theNPC, town.getCentre());
                 if (npcEntity != null) {
                     npcEntity.getPhysicalAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(a -> a.getAIType() == Action.AIType.PHYSICAL).collect(Collectors.toCollection(LinkedList::new)));
                     npcEntity.getMentalAI().addToHead((LinkedList<Action>) memorableActions.get(uniqueID).stream().filter(a -> a.getAIType() == Action.AIType.MENTAL).collect(Collectors.toCollection(LinkedList::new)));

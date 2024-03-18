@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -27,6 +28,7 @@ public record AcceptCitizenshipPacket(ResourceKey<Level> dimension, int townID, 
     public @NotNull ResourceLocation id() {
         return ID;
     }
+
     public AcceptCitizenshipPacket(FriendlyByteBuf buf) {
         this(buf.readResourceKey(Registries.DIMENSION), buf.readInt(), buf.readUUID());
     }
@@ -40,7 +42,9 @@ public record AcceptCitizenshipPacket(ResourceKey<Level> dimension, int townID, 
 
     @Override
     public void handleServer(ServerPlayer player) {
-        Town<?> town = TownSavedData.get(player.serverLevel()).getTownByID(dimension, townID);
+        ServerLevel level = player.serverLevel().getServer().getLevel(dimension);
+        if (level == null) return; //If the level is null, then we can't do anything
+        Town<?> town = TownSavedData.get(level).getTownByID(townID);
         PenguinTeam team = PenguinTeams.getTeamFromID(player.serverLevel(), member);
         if (team.getID().equals(town.getCharter().getTeamID())) { //Only the owner can kick
             PenguinTeams.get(player.serverLevel()).changeTeam(player.serverLevel(), member, town.getCharter().getTeamID());

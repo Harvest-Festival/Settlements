@@ -5,6 +5,7 @@ import net.minecraft.network.FriendlyByteBuf;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -38,7 +39,9 @@ public record ToggleCitizenshipServerPacket(ResourceKey<Level> dimension, int to
 
     @Override
     public void handleServer(ServerPlayer player) {
-        TownServer town = TownSavedData.get(player.serverLevel()).getTownByID(dimension, townID);
+        ServerLevel level = player.serverLevel().getServer().getLevel(dimension);
+        if (level == null) return; //If the level is null, then we can't do anything
+        TownServer town = TownSavedData.get(level).getTownByID(townID);
         PenguinTeam team = PenguinTeams.getTeamForPlayer(player);
         if (town.getCharter().getTeamID().equals(team.getID())) {
             town.getGovernment().toggleCitizenship();

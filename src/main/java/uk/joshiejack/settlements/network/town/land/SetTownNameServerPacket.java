@@ -6,6 +6,7 @@ import net.minecraft.network.chat.Component;
 import net.minecraft.network.protocol.PacketFlow;
 import net.minecraft.resources.ResourceKey;
 import net.minecraft.resources.ResourceLocation;
+import net.minecraft.server.level.ServerLevel;
 import net.minecraft.server.level.ServerPlayer;
 import net.minecraft.world.level.Level;
 import org.jetbrains.annotations.NotNull;
@@ -42,10 +43,12 @@ public record SetTownNameServerPacket(ResourceKey<Level> dimension, int townID, 
 
     @Override
     public void handleServer(ServerPlayer player) {
+        ServerLevel level = player.serverLevel().getServer().getLevel(dimension);
+        if (level == null) return; //If the level is null, then we can't do anything
         UUID playerUUID = player.getUUID();
         PenguinTeam team = PenguinTeams.getTeamFromID(player.serverLevel(), playerUUID);
-        TownSavedData data = TownSavedData.get(player.serverLevel());
-        TownServer town = data.getTownByID(dimension, townID);
+        TownSavedData data = TownSavedData.get(level);
+        TownServer town = data.getTownByID(townID);
         if (playerUUID.equals(team.getOwner())) { //Only the owner can kick
             town.getCharter().setName(Component.literal(name));
             TownSavedData.get(player.serverLevel()).setDirty();
